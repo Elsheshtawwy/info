@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>Chapter 4 Exam 1</h1>
+            <label class="slider-label">Select number of T/F questions:</label>
+            <input type="range" id="tfCount" min="1" max="0" value="5" oninput="updateValue('tfCountValue', this.value)">
+            <span id="tfCountValue">1</span>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+      const questions =[
+
+// True/False Questions
+{ type: 'tf', question: 'Microwave transmission operates in the frequency range of 300 MHz to 300 GHz.', answer: 'T' },
+{ type: 'tf', question: 'WiMAX operates like Wi-Fi, but over shorter distances and at slower transmission speeds.', answer: 'F' },
+{ type: 'tf', question: 'A personal area network (PAN) supports interconnection of information technology within a range of about 33 feet.', answer: 'T' },
+{ type: 'tf', question: 'In decentralized processing, all processing occurs in a single location.', answer: 'F' },
+{ type: 'tf', question: 'Distributed processing involves placing processing devices at remote locations but connecting them via a network.', answer: 'T' },
+{ type: 'tf', question: 'A server in a client/server architecture is responsible for requesting programs and data from other computers on the network.', answer: 'F' },
+{ type: 'tf', question: 'A network operating system (NOS) controls the computer systems and devices on a network.', answer: 'T' },
+{ type: 'tf', question: 'ICANN is responsible for managing IP addresses and Internet domain names.', answer: 'T' },
+{ type: 'tf', question: 'A 64-bit number that identifies a computer on the Internet is called a Uniform Resource Locator (URL).', answer: 'F' },
+{ type: 'tf', question: 'Cloud computing environments often take advantage of virtualization technologies.', answer: 'T' },
+{ type: 'tf', question: 'The Internet was originally developed by Tim Berners-Lee at CERN.', answer: 'F' },
+{ type: 'tf', question: 'Hypertext Markup Language (HTML) is the standard page description language for web pages.', answer: 'T' },
+{ type: 'tf', question: 'Java is an object-oriented programming language based on C++ that allows small programs to be embedded within an HTML document.', answer: 'T' },
+{ type: 'tf', question: 'Instant messaging supports online, real-time communication between two or more people connected to the Internet.', answer: 'T' },
+{ type: 'tf', question: 'Internet radio is delivered digitally to your computer over the Internet and uses compressed music formats such as MP3.', answer: 'T' },
+{ type: 'tf', question: 'Intranets are internal corporate networks built using Internet and World Wide Web standards and technologies.', answer: 'T' },
+{ type: 'tf', question: 'An extranet is a network that links a company\'s intranet with its competitors.', answer: 'F' },
+{ type: 'tf', question: 'The ARPANET project was started by the U.S. Department of Defense in 1969.', answer: 'T' },
+{ type: 'tf', question: 'Network management software is used to protect software from being copied, modified, or downloaded illegally.', answer: 'T' },
+{ type: 'tf', question: 'Telepresence is a form of video conferencing that takes it to the ultimate level by providing a highly immersive experience.', answer: 'T' },
+
+// Multiple Choice Questions
+{ type: 'mc', question: 'Which of the following is a high-frequency signal sent through the air for wireless telecommunications?', options: ['a) Infrared', 'b) Microwave', 'c) Radio', 'd) Fiber-optic'], answer: 'b) Microwave' },
+{ type: 'mc', question: 'What is the primary advantage of cloud computing for businesses?', options: ['a) Increased control over hardware', 'b) Cost savings on system design', 'c) Limited accessibility', 'd) Fixed scalability'], answer: 'b) Cost savings on system design' },
+{ type: 'mc', question: 'Which markup language defines the visual appearance of content in a web page?', options: ['a) HTML', 'b) XML', 'c) CSS', 'd) PHP'], answer: 'c) CSS' },
+{ type: 'mc', question: 'The Internet protocol that enables computers to route communications traffic from one network to another is called:', options: ['a) TCP', 'b) IP', 'c) URL', 'd) ICANN'], answer: 'b) IP' },
+{ type: 'mc', question: 'Which of the following describes a wide area network (WAN)?', options: ['a) Connects computer systems within a small area', 'b) Supports interconnection within a 33 feet range', 'c) Connects large geographic regions', 'd) Connects users within a city'], answer: 'c) Connects large geographic regions' },
+{ type: 'mc', question: 'What term is used for an internal corporate network built using Internet and World Wide Web standards?', options: ['a) Extranet', 'b) Intranet', 'c) LAN', 'd) PAN'], answer: 'b) Intranet' },
+{ type: 'mc', question: 'Which type of wireless communication supports broadband speed data communications in a mobile environment?', options: ['a) Wi-Fi', 'b) 3G', 'c) Bluetooth', 'd) NFC'], answer: 'b) 3G' },
+{ type: 'mc', question: 'Who is responsible for managing IP addresses and Internet domain names?', options: ['a) DoD', 'b) CERN', 'c) ICANN', 'd) ISO'], answer: 'c) ICANN' },
+{ type: 'mc', question: 'What is the purpose of network operating systems (NOS)?', options: ['a) To protect software from being copied', 'b) To control computer systems and devices on a network', 'c) To develop software applications', 'd) To manage domain name disputes'], answer: 'b) To control computer systems and devices on a network' },
+{ type: 'mc', question: 'Which of the following is an example of guided transmission media?', options: ['a) Radio', 'b) Microwave', 'c) Fiber-optic cable', 'd) WiMAX'], answer: 'c) Fiber-optic cable' },
+{ type: 'mc', question: 'What type of processing involves placing all processing in a single location?', options: ['a) Distributed', 'b) Centralized', 'c) Decentralized', 'd) Local'], answer: 'b) Centralized' },
+{ type: 'mc', question: 'Which of the following uses an automated approach to scour the Web for information?', options: ['a) Wikipedia', 'b) Google', 'c) Wikimedia', 'd) eBay'], answer: 'b) Google' },
+{ type: 'mc', question: 'Which of these is not a feature of smartphones?', options: ['a) Combining functionality of multiple devices', 'b) Having own software operating systems', 'c) Fixed transmission speeds', 'd) Applications developed by third-party developers'], answer: 'c) Fixed transmission speeds' },
+{ type: 'mc', question: 'Which programming language allows small programs to be embedded within an HTML document?', options: ['a) PHP', 'b) Java', 'c) JavaScript', 'd) VBScript'], answer: 'b) Java' },
+{ type: 'mc', question: 'What does a client/server architecture involve?', options: ['a) Single computer platform', 'b) Multiple platforms dedicated to special functions', 'c) All processing in one location', 'd) No dedicated servers'], answer: 'b) Multiple platforms dedicated to special functions' },
+{ type: 'mc', question: 'What is the 64-bit number that identifies a computer on the Internet?', options: ['a) IP address', 'b) URL', 'c) TCP', 'd) Domain name'], answer: 'a) IP address' },
+{ type: 'mc', question: 'Which frequency range is used for microwave transmission?', options: ['a) 300 MHz–300 GHz', 'b) 30 MHz–300 GHz', 'c) 300 MHz–300 GHz', 'd) 30 MHz–30 GHz'], answer: 'a) 300 MHz–300 GHz' },
+{ type: 'mc', question: 'Which web client software is used to view web pages?', options: ['a) HTML', 'b) IP', 'c) Web browser', 'd) CSS'], answer: 'c) Web browser' },
+{ type: 'mc', question: 'Which markup language is used for web documents containing structured information?', options: ['a) HTML', 'b) XML', 'c) CSS', 'd) PHP'], answer: 'b) XML' },
+{ type: 'mc', question: 'What enables you to find information on the Web by specifying keywords?', options: ['a) Web browser', 'b) Search engine', 'c) HTML', 'd) CSS'], answer: 'b) Search engine' }
+
+];
+
+
+
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedTFCount = 0;
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+            shuffleQuestions();
+        });
+
+        function updateRangeValues() {
+            const tfRange = document.getElementById('tfCount');
+            const mcRange = document.getElementById('mcCount');
+            tfRange.max = questions.filter(q => q.type === 'tf').length;
+            mcRange.max = questions.filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function startExam() {
+            selectedTFCount = parseInt(document.getElementById('tfCount').value);
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const tfQuestions = questions.filter(q => q.type === 'tf').slice(0, selectedTFCount);
+            const mcQuestions = questions.filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return [...tfQuestions, ...mcQuestions];
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'tf') {
+                questionElement.innerHTML += `
+                    <label style="display:block;"><input type="radio" name="answer" value="T"> T</label>
+                    <label style="display:block;"><input type="radio" name="answer" value="F"> F</label>
+                `;
+            } else if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = F;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                } else {
+                    correctAnswers.push({ question: question.question, correctAnswer: question.answer, userAnswer: userAnswers[index] });
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = `<div class="result">You scored ${score} out of ${selectedQuestions.length}</div>`;
+
+            if (score === selectedQuestions.length) {
+                resultContainer.innerHTML += '<div class="result">Congratulations! You got a perfect score!</div>';
+            } else {
+                correctAnswers.forEach(({ question, correctAnswer, userAnswer }) => {
+                    resultContainer.innerHTML += `
+                        <div class="result">
+                            <p>Question: ${question}</p>
+                            <p>Correct Answer: ${correctAnswer}</p>
+                            <p>Your Answer: ${userAnswer}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('homeContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+

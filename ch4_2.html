@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>Chapter 4 Exam 2</h1>
+            <label class="slider-label">Select number of T/F questions:</label>
+            <input type="range" id="tfCount" min="1" max="0" value="5" oninput="updateValue('tfCountValue', this.value)">
+            <span id="tfCountValue">1</span>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+      const questions =[
+
+// True/False Questions
+{ type: 'tf', question: 'Internet Protocol version 6 (IPv6) uses 128-bit addresses.', answer: 'T' },
+{ type: 'tf', question: 'TCP/IP is the communication protocol used for the Internet and similar networks.', answer: 'T' },
+{ type: 'tf', question: 'A virtual private network (VPN) uses a public network such as the Internet to create a secure, private network.', answer: 'T' },
+{ type: 'tf', question: 'Broadband connections are typically slower than dial-up connections.', answer: 'F' },
+{ type: 'tf', question: 'A firewall is a hardware or software gate that protects internal networks from unauthorized access.', answer: 'T' },
+{ type: 'tf', question: 'Packet switching is a method of transferring data by breaking it into small packets.', answer: 'T' },
+{ type: 'tf', question: 'Ethernet is a common method of networking computers in a local area network (LAN).', answer: 'T' },
+{ type: 'tf', question: 'Satellite transmission is a form of guided media.', answer: 'F' },
+{ type: 'tf', question: 'A star network topology has a central hub with nodes connected to it.', answer: 'T' },
+{ type: 'tf', question: 'In a mesh network topology, each device is connected to every other device.', answer: 'T' },
+{ type: 'tf', question: 'The Internet is an example of a wide area network (WAN).', answer: 'T' },
+{ type: 'tf', question: 'Phishing is a technique used to gain unauthorized access to computers.', answer: 'T' },
+{ type: 'tf', question: 'Multimedia messaging service (MMS) is an extension of SMS.', answer: 'T' },
+{ type: 'tf', question: 'An IP address is divided into a network part and a host part.', answer: 'T' },
+{ type: 'tf', question: 'HTTP stands for HyperText Transfer Protocol.', answer: 'T' },
+{ type: 'tf', question: 'POP3 is a protocol used for receiving email.', answer: 'T' },
+{ type: 'tf', question: 'SMTP is a protocol used for sending email.', answer: 'T' },
+{ type: 'tf', question: 'Bluetooth technology is used for short-range wireless communication.', answer: 'T' },
+{ type: 'tf', question: 'The World Wide Web was invented by Vint Cerf.', answer: 'F' },
+{ type: 'tf', question: 'Fiber-optic cables use light to transmit data.', answer: 'T' },
+
+// Multiple Choice Questions
+{ type: 'mc', question: 'Which of the following is a type of malware designed to replicate itself?', options: ['a) Virus', 'b) Worm', 'c) Trojan horse', 'd) Spyware'], answer: 'b) Worm' },
+{ type: 'mc', question: 'What does URL stand for?', options: ['a) Uniform Resource Locator', 'b) Uniform Resource Link', 'c) Universal Resource Locator', 'd) Universal Resource Link'], answer: 'a) Uniform Resource Locator' },
+{ type: 'mc', question: 'Which of the following is a common protocol for web browsing?', options: ['a) FTP', 'b) SMTP', 'c) HTTP', 'd) SNMP'], answer: 'c) HTTP' },
+{ type: 'mc', question: 'What type of address is used by computers to identify each other on the Internet?', options: ['a) MAC address', 'b) IP address', 'c) Subnet mask', 'd) Gateway address'], answer: 'b) IP address' },
+{ type: 'mc', question: 'Which of the following is not a characteristic of a local area network (LAN)?', options: ['a) Limited geographic area', 'b) High-speed connectivity', 'c) Owned by a single organization', 'd) Connects to the Internet'], answer: 'd) Connects to the Internet' },
+{ type: 'mc', question: 'What device forwards data packets between computer networks?', options: ['a) Switch', 'b) Router', 'c) Hub', 'd) Bridge'], answer: 'b) Router' },
+{ type: 'mc', question: 'Which protocol is used to securely transfer files over the Internet?', options: ['a) FTP', 'b) SFTP', 'c) HTTP', 'd) IMAP'], answer: 'b) SFTP' },
+{ type: 'mc', question: 'Which of the following is a decentralized, distributed ledger used to record transactions?', options: ['a) Blockchain', 'b) Database', 'c) Spreadsheet', 'd) XML'], answer: 'a) Blockchain' },
+{ type: 'mc', question: 'Which of the following is an example of a wireless personal area network (WPAN)?', options: ['a) Ethernet', 'b) Bluetooth', 'c) Wi-Fi', 'd) Cellular network'], answer: 'b) Bluetooth' },
+{ type: 'mc', question: 'What is the primary purpose of the Domain Name System (DNS)?', options: ['a) To provide security for Internet transactions', 'b) To translate domain names into IP addresses', 'c) To establish connections between networks', 'd) To route data packets on the Internet'], answer: 'b) To translate domain names into IP addresses' },
+{ type: 'mc', question: 'Which protocol is used for exchanging email messages between email servers?', options: ['a) POP3', 'b) IMAP', 'c) SMTP', 'd) HTTP'], answer: 'c) SMTP' },
+{ type: 'mc', question: 'What type of network topology involves all devices connected to a single central hub?', options: ['a) Ring', 'b) Mesh', 'c) Star', 'd) Bus'], answer: 'c) Star' },
+{ type: 'mc', question: 'Which technology is used for long-distance wireless communication?', options: ['a) Wi-Fi', 'b) LTE', 'c) Bluetooth', 'd) NFC'], answer: 'b) LTE' },
+{ type: 'mc', question: 'What is the role of an Internet Service Provider (ISP)?', options: ['a) To develop web browsers', 'b) To provide Internet access to users', 'c) To create web content', 'd) To manage domain names'], answer: 'b) To provide Internet access to users' },
+{ type: 'mc', question: 'Which type of network connects devices within a single building or campus?', options: ['a) WAN', 'b) LAN', 'c) MAN', 'd) PAN'], answer: 'b) LAN' },
+{ type: 'mc', question: 'What does SSL stand for?', options: ['a) Secure Sockets Layer', 'b) Secure Server Link', 'c) Secure System Log', 'd) Secure Software License'], answer: 'a) Secure Sockets Layer' },
+{ type: 'mc', question: 'Which of the following is a benefit of using fiber-optic cables?', options: ['a) Lower cost', 'b) Resistance to electromagnetic interference', 'c) Easier installation', 'd) Higher flexibility'], answer: 'b) Resistance to electromagnetic interference' },
+{ type: 'mc', question: 'Which technology uses radio waves for identification and tracking of objects?', options: ['a) RFID', 'b) GPS', 'c) WiMAX', 'd) Zigbee'], answer: 'a) RFID' },
+{ type: 'mc', question: 'Which protocol is used to retrieve email from a mail server?', options: ['a) SMTP', 'b) FTP', 'c) POP3', 'd) Telnet'], answer: 'c) POP3' },
+{ type: 'mc', question: 'Which of the following is a cloud computing service model?', options: ['a) PaaS', 'b) SaaS', 'c) IaaS', 'd) All of the above'], answer: 'd) All of the above' }
+
+];
+
+
+
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedTFCount = 0;
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+            shuffleQuestions();
+        });
+
+        function updateRangeValues() {
+            const tfRange = document.getElementById('tfCount');
+            const mcRange = document.getElementById('mcCount');
+            tfRange.max = questions.filter(q => q.type === 'tf').length;
+            mcRange.max = questions.filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function startExam() {
+            selectedTFCount = parseInt(document.getElementById('tfCount').value);
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const tfQuestions = questions.filter(q => q.type === 'tf').slice(0, selectedTFCount);
+            const mcQuestions = questions.filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return [...tfQuestions, ...mcQuestions];
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'tf') {
+                questionElement.innerHTML += `
+                    <label style="display:block;"><input type="radio" name="answer" value="T"> T</label>
+                    <label style="display:block;"><input type="radio" name="answer" value="F"> F</label>
+                `;
+            } else if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = F;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                } else {
+                    correctAnswers.push({ question: question.question, correctAnswer: question.answer, userAnswer: userAnswers[index] });
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = `<div class="result">You scored ${score} out of ${selectedQuestions.length}</div>`;
+
+            if (score === selectedQuestions.length) {
+                resultContainer.innerHTML += '<div class="result">Congratulations! You got a perfect score!</div>';
+            } else {
+                correctAnswers.forEach(({ question, correctAnswer, userAnswer }) => {
+                    resultContainer.innerHTML += `
+                        <div class="result">
+                            <p>Question: ${question}</p>
+                            <p>Correct Answer: ${correctAnswer}</p>
+                            <p>Your Answer: ${userAnswer}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('homeContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>Chapter 4 Exam 4</h1>
+            <label class="slider-label">Select number of T/F questions:</label>
+            <input type="range" id="tfCount" min="1" max="0" value="5" oninput="updateValue('tfCountValue', this.value)">
+            <span id="tfCountValue">1</span>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <p>There are 30 T/F and Multiple choice questions in this exam</p>
+            <p>i'm sure u got this🙏🤍</p>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+      const questions =[
+
+// True/False Questions
+{ type: 'tf', question: 'ARP is used to map IP addresses to MAC addresses in a local network.', answer: 'T' },
+{ type: 'tf', question: 'IPv6 addresses are 64 bits long.', answer: 'F' },
+{ type: 'tf', question: 'A VPN provides a secure connection over a public network.', answer: 'T' },
+{ type: 'tf', question: 'TCP/IP is the basic communication protocol of the Internet.', answer: 'T' },
+{ type: 'tf', question: 'A firewall monitors and controls incoming and outgoing network traffic based on predetermined security rules.', answer: 'T' },
+{ type: 'tf', question: 'Packet switching involves the transmission of data in large, fixed-size blocks.', answer: 'F' },
+{ type: 'tf', question: 'Ethernet is a family of networking technologies commonly used in local area networks (LANs).', answer: 'T' },
+{ type: 'tf', question: 'A star topology connects each device to a central hub.', answer: 'T' },
+{ type: 'tf', question: 'Phishing is a method of sending emails that appear to be from reputable sources to steal personal information.', answer: 'T' },
+{ type: 'tf', question: 'MMS stands for Multimedia Messaging Service.', answer: 'T' },
+{ type: 'tf', question: 'An IP address uniquely identifies a device on a network.', answer: 'T' },
+{ type: 'tf', question: 'HTTP stands for HyperText Transfer Protocol.', answer: 'T' },
+{ type: 'tf', question: 'POP3 is a protocol used for sending emails.', answer: 'F' },
+{ type: 'tf', question: 'SMTP is used to send emails from a client to a server.', answer: 'T' },
+{ type: 'tf', question: 'Bluetooth technology is used for long-range communication.', answer: 'F' },
+{ type: 'tf', question: 'Vint Cerf is known as one of the fathers of the Internet.', answer: 'T' },
+{ type: 'tf', question: 'Fiber-optic cables use light to transmit data.', answer: 'T' },
+{ type: 'tf', question: 'DNS stands for Domain Name System.', answer: 'T' },
+{ type: 'tf', question: 'A Trojan horse is a type of malware disguised as legitimate software.', answer: 'T' },
+{ type: 'tf', question: 'Wi-Fi is a trademarked name for wireless LAN (WLAN) products.', answer: 'T' },
+{ type: 'tf', question: 'A proxy server acts as an intermediary for requests from clients seeking resources from other servers.', answer: 'T' },
+{ type: 'tf', question: 'The IETF is responsible for the technical standards that make up the Internet protocol suite.', answer: 'T' },
+{ type: 'tf', question: 'HTTPS is a secure version of HTTP.', answer: 'T' },
+{ type: 'tf', question: 'A router directs data packets between computer networks.', answer: 'T' },
+{ type: 'tf', question: 'NFC stands for Near Field Communication.', answer: 'T' },
+{ type: 'tf', question: 'The OSI model has 5 layers.', answer: 'F' },
+{ type: 'tf', question: 'SSL stands for Secure Sockets Layer.', answer: 'T' },
+{ type: 'tf', question: 'VoIP stands for Voice over Internet Protocol.', answer: 'T' },
+{ type: 'tf', question: 'SSH is used for secure remote login and other secure network services over an unsecured network.', answer: 'T' },
+{ type: 'tf', question: 'A MAN is a Metropolitan Area Network.', answer: 'T' },
+
+// Multiple Choice Questions
+{ type: 'mc', question: 'Which protocol is used to map IP addresses to MAC addresses in a local network?', options: ['a) DHCP', 'b) ARP', 'c) DNS', 'd) ICMP'], answer: 'b) ARP' },
+{ type: 'mc', question: 'IPv6 addresses are how many bits long?', options: ['a) 32', 'b) 64', 'c) 128', 'd) 256'], answer: 'c) 128' },
+{ type: 'mc', question: 'What does VPN stand for?', options: ['a) Virtual Protocol Network', 'b) Virtual Private Network', 'c) Visual Private Network', 'd) Virtual Public Network'], answer: 'b) Virtual Private Network' },
+{ type: 'mc', question: 'Which protocol is the foundation of the Internet?', options: ['a) FTP', 'b) HTTP', 'c) TCP/IP', 'd) SMTP'], answer: 'c) TCP/IP' },
+{ type: 'mc', question: 'Which device monitors and controls incoming and outgoing network traffic?', options: ['a) Router', 'b) Switch', 'c) Firewall', 'd) Hub'], answer: 'c) Firewall' },
+{ type: 'mc', question: 'Which data transmission method involves breaking data into packets?', options: ['a) Circuit switching', 'b) Packet switching', 'c) Message switching', 'd) Cell switching'], answer: 'b) Packet switching' },
+{ type: 'mc', question: 'What is Ethernet primarily used for?', options: ['a) Wide area networks', 'b) Local area networks', 'c) Personal area networks', 'd) Metropolitan area networks'], answer: 'b) Local area networks' },
+{ type: 'mc', question: 'In which topology are all devices connected to a central hub?', options: ['a) Bus', 'b) Star', 'c) Ring', 'd) Mesh'], answer: 'b) Star' },
+{ type: 'mc', question: 'What is the purpose of phishing?', options: ['a) To catch fish', 'b) To steal personal information', 'c) To improve network security', 'd) To enhance email performance'], answer: 'b) To steal personal information' },
+{ type: 'mc', question: 'What does MMS stand for?', options: ['a) Multimedia Messaging Service', 'b) Multi Message Service', 'c) Media Message Service', 'd) Multi Media System'], answer: 'a) Multimedia Messaging Service' },
+{ type: 'mc', question: 'What does an IP address do?', options: ['a) Identifies a device on a network', 'b) Encrypts data', 'c) Connects networks', 'd) Translates domain names'], answer: 'a) Identifies a device on a network' },
+{ type: 'mc', question: 'What does HTTP stand for?', options: ['a) Hypertext Transfer Protocol', 'b) Hyperlink Text Protocol', 'c) Hypertext Transmission Protocol', 'd) Hyperlink Transfer Protocol'], answer: 'a) Hypertext Transfer Protocol' },
+{ type: 'mc', question: 'Which protocol is used to retrieve emails from a server?', options: ['a) SMTP', 'b) HTTP', 'c) POP3', 'd) FTP'], answer: 'c) POP3' },
+{ type: 'mc', question: 'Which protocol is used to send emails?', options: ['a) SMTP', 'b) POP3', 'c) FTP', 'd) HTTP'], answer: 'a) SMTP' },
+{ type: 'mc', question: 'What is Bluetooth used for?', options: ['a) Long-range communication', 'b) Short-range communication', 'c) Secure communication', 'd) Wired communication'], answer: 'b) Short-range communication' },
+{ type: 'mc', question: 'Who is known as one of the fathers of the Internet?', options: ['a) Tim Berners-Lee', 'b) Bill Gates', 'c) Vint Cerf', 'd) Steve Jobs'], answer: 'c) Vint Cerf' },
+{ type: 'mc', question: 'What do fiber-optic cables use to transmit data?', options: ['a) Electrical signals', 'b) Light', 'c) Radio waves', 'd) Sound'], answer: 'b) Light' },
+{ type: 'mc', question: 'What does DNS stand for?', options: ['a) Domain Name System', 'b) Digital Network System', 'c) Data Name Service', 'd) Domain Network Service'], answer: 'a) Domain Name System' },
+{ type: 'mc', question: 'What is a Trojan horse?', options: ['a) A type of firewall', 'b) A type of malware', 'c) A network protocol', 'd) A data encryption method'], answer: 'b) A type of malware' },
+{ type: 'mc', question: 'What is Wi-Fi?', options: ['a) A type of wired network', 'b) A type of wireless network', 'c) A data encryption method', 'd) A network protocol'], answer: 'b) A type of wireless network' },
+{ type: 'mc', question: 'What is the role of a proxy server?', options: ['a) Acts as an intermediary for requests from clients', 'b) Provides direct access to the Internet', 'c) Translates IP addresses into domain names', 'd) Encrypts data'], answer: 'a) Acts as an intermediary for requests from clients' },
+{ type: 'mc', question: 'What does IETF stand for?', options: ['a) Internet Engineering Task Force', 'b) Internet Evaluation Task Force', 'c) International Engineering Task Force', 'd) Internet Engineering Technical Foundation'], answer: 'a) Internet Engineering Task Force' },
+{ type: 'mc', question: 'What is the secure version of HTTP?', options: ['a) FTP', 'b) HTTPS', 'c) SSH', 'd) SFTP'], answer: 'b) HTTPS' },
+{ type: 'mc', question: 'What does a router do?', options: ['a) Routes data packets between networks', 'b) Connects devices within a network', 'c) Filters incoming and outgoing traffic', 'd) Translates domain names'], answer: 'a) Routes data packets between networks' },
+{ type: 'mc', question: 'What does NFC stand for?', options: ['a) Near Field Communication', 'b) Network Field Communication', 'c) Near Frequency Communication', 'd) Network Frequency Communication'], answer: 'a) Near Field Communication' },
+{ type: 'mc', question: 'How many layers are in the OSI model?', options: ['a) 5', 'b) 6', 'c) 7', 'd) 8'], answer: 'c) 7' },
+{ type: 'mc', question: 'What does VoIP stand for?', options: ['a) Video over Internet Protocol', 'b) Voice over Internet Protocol', 'c) Virtual over Internet Protocol', 'd) Voice over Internal Protocol'], answer: 'b) Voice over Internet Protocol' },
+{ type: 'mc', question: 'What is SSH used for?', options: ['a) Secure file transfer', 'b) Secure remote login', 'c) Secure email', 'd) Secure web browsing'], answer: 'b) Secure remote login' },
+{ type: 'mc', question: 'What does MAN stand for?', options: ['a) Metropolitan Area Network', 'b) Main Area Network', 'c) Medium Area Network', 'd) Multi Area Network'], answer: 'a) Metropolitan Area Network' },
+{ type: 'mc', question: 'Which protocol is used to retrieve emails from a server?', options: ['a) POP3', 'b) SMTP', 'c) HTTP', 'd) FTP'], answer: 'a) POP3' },
+{ type: 'mc', question: 'What is a network operating system?', options: ['a) Software that controls network traffic', 'b) Software that manages network resources', 'c) Software that encrypts network data', 'd) Software that monitors network performance'], answer: 'b) Software that manages network resources' },
+{ type: 'mc', question: 'What technology underpins cryptocurrencies?', options: ['a) Blockchain', 'b) SSL', 'c) VoIP', 'd) NFC'], answer: 'a) Blockchain' },
+{ type: 'mc', question: 'What is a protocol?', options: ['a) A set of rules governing data communication', 'b) A type of network topology', 'c) A data encryption method', 'd) A type of malware'], answer: 'a) A set of rules governing data communication' },
+{ type: 'mc', question: 'What does SSL stand for?', options: ['a) Secure Sockets Layer', 'b) Secure Software Layer', 'c) Secure Server Layer', 'd) Secure System Layer'], answer: 'a) Secure Sockets Layer' },
+
+];
+
+
+
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedTFCount = 0;
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+            shuffleQuestions();
+        });
+
+        function updateRangeValues() {
+            const tfRange = document.getElementById('tfCount');
+            const mcRange = document.getElementById('mcCount');
+            tfRange.max = questions.filter(q => q.type === 'tf').length;
+            mcRange.max = questions.filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function startExam() {
+            selectedTFCount = parseInt(document.getElementById('tfCount').value);
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const tfQuestions = questions.filter(q => q.type === 'tf').slice(0, selectedTFCount);
+            const mcQuestions = questions.filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return [...tfQuestions, ...mcQuestions];
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'tf') {
+                questionElement.innerHTML += `
+                    <label style="display:block;"><input type="radio" name="answer" value="T"> T</label>
+                    <label style="display:block;"><input type="radio" name="answer" value="F"> F</label>
+                `;
+            } else if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = F;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                } else {
+                    correctAnswers.push({ question: question.question, correctAnswer: question.answer, userAnswer: userAnswers[index] });
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = `<div class="result">You scored ${score} out of ${selectedQuestions.length}</div>`;
+
+            if (score === selectedQuestions.length) {
+                resultContainer.innerHTML += '<div class="result">Congratulations! You got a perfect score!</div>';
+            } else {
+                correctAnswers.forEach(({ question, correctAnswer, userAnswer }) => {
+                    resultContainer.innerHTML += `
+                        <div class="result">
+                            <p>Question: ${question}</p>
+                            <p>Correct Answer: ${correctAnswer}</p>
+                            <p>Your Answer: ${userAnswer}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('homeContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+

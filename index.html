@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Requirements Exam</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #4CAF49;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+
+        .button-container {
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button.easy, button.hard {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        button.easy:hover {
+            background-color: #1976D2;
+        }
+
+        button.hard {
+            background-color: #F44336;
+        }
+
+        button.hard:hover {
+            background-color: #D32F2F;
+        }
+
+        button.test1, button.test2, button.chapter {
+            background-color: #FFC107;
+            color: white;
+        }
+
+        button.test1:hover, button.test2:hover, button.chapter:hover {
+            background-color: #FFA000;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .hidden {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+        }
+
+        .visible {
+            max-height: 300px; /* Adjust if needed */
+            opacity: 1;
+            transition: max-height 0.5s ease-in, opacity 0.5s ease-in;
+        }
+
+        .test-buttons, .chapter-buttons, .comprehensive-buttons {
+            display: flex;
+            flex-wrap: wrap; /* Ensure buttons wrap to the next line if needed */
+            justify-content: center;
+        }
+
+        .test-buttons {
+            display: flex;
+            flex-direction: row; /* Align buttons horizontally */
+            align-items: center;
+        }
+
+        .comprehensive-buttons {
+            flex-direction: column; /* Align buttons vertically */
+            align-items: center;
+        }
+
+        .test-buttons button, .chapter-buttons button, .comprehensive-buttons button {
+            margin: 5px; /* Adjust spacing between buttons */
+        }
+
+        @media (max-width: 600px) {
+            button {
+                font-size: 0.8em;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Software Requirements Exam</h1>
+    </header>
+    <main>
+        <div class="button-container">
+            <!-- Button to select chapter -->
+            <!-- <button class="chapter" onclick="toggleChapters()">Select Chapter</button> -->
+            <!-- <div id="chapter-buttons" class="hidden chapter-buttons">
+                <a href="./ch1.html" target="_blank"><button class="chapter">ch1</button></a>
+                <a href="./ch2.html" target="_blank"><button class="chapter">ch2</button></a>
+                <a href="./ch3.html" target="_blank"><button class="chapter">ch3</button></a>
+                <a href="./ch4.html" target="_blank"><button class="chapter">ch4</button></a>
+                <a href="./ch5.html" target="_blank"><button class="chapter">ch5</button></a>
+                <a href="./ch6.html" target="_blank"><button class="chapter">ch6</button></a>
+                <a href="./ch7.html" target="_blank"><button class="chapter">ch7</button></a>
+            </div> -->
+            <!-- Button to show comprehensive tests -->
+            <button class="easy" onclick="toggleComprehensiveTests()">Select Chapter</button>
+            <div id="comprehensive-buttons" class="hidden comprehensive-buttons">
+                <button class="easy" onclick="toggleTests()">ch04</button>
+                <div id="test-buttons" class="hidden test-buttons">
+                    <a href="./ch4_1.html" target="_blank"><button class="test1">ch4_1</button></a>
+                    <a href="./ch4_2.html" target="_blank"><button class="test2">ch4_2</button></a>
+                    <a href="./ch4_3.html" target="_blank"><button class="test2">ch4_3</button></a>
+                    <a href="./ch4_4.html" target="_blank"><button class="test2">ch4_4</button></a>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        Developed by Badr El sheshtawy
+    </footer>
+
+    <script>
+        function toggleTests() {
+            const testButtons = document.getElementById('test-buttons');
+            if (testButtons.classList.contains('hidden')) {
+                testButtons.classList.remove('hidden');
+                testButtons.classList.add('visible');
+            } else {
+                testButtons.classList.remove('visible');
+                testButtons.classList.add('hidden');
+            }
+        }
+
+        function toggleChapters() {
+            const chapterButtons = document.getElementById('chapter-buttons');
+            if (chapterButtons.classList.contains('hidden')) {
+                chapterButtons.classList.remove('hidden');
+                chapterButtons.classList.add('visible');
+            } else {
+                chapterButtons.classList.remove('visible');
+                chapterButtons.classList.add('hidden');
+            }
+        }
+
+        function toggleComprehensiveTests() {
+            const comprehensiveButtons = document.getElementById('comprehensive-buttons');
+            if (comprehensiveButtons.classList.contains('hidden')) {
+                comprehensiveButtons.classList.remove('hidden');
+                comprehensiveButtons.classList.add('visible');
+            } else {
+                comprehensiveButtons.classList.remove('visible');
+                comprehensiveButtons.classList.add('hidden');
+            }
+        }
+
+        function selectChapter(chapter) {
+            // Hide chapter buttons and show test options
+            const chapterButtons = document.getElementById('chapter-buttons');
+            chapterButtons.classList.remove('visible');
+            chapterButtons.classList.add('hidden');
+            
+            const comprehensiveButtons = document.getElementById('comprehensive-buttons');
+            comprehensiveButtons.classList.remove('hidden');
+            comprehensiveButtons.classList.add('visible');
+        }
+    </script>
+</body>
+</html>

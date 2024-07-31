@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>Chapter 4 Exam 3</h1>
+            <label class="slider-label">Select number of T/F questions:</label>
+            <input type="range" id="tfCount" min="1" max="0" value="5" oninput="updateValue('tfCountValue', this.value)">
+            <span id="tfCountValue">1</span>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+      const questions =[
+// True/False Questions
+{ type: 'tf', question: 'The Domain Name System (DNS) translates domain names into IP addresses.', answer: 'T' },
+{ type: 'tf', question: 'A Trojan horse is a type of malware that disguises itself as a legitimate program.', answer: 'T' },
+{ type: 'tf', question: 'Packet switching involves sending data in continuous streams.', answer: 'F' },
+{ type: 'tf', question: 'A virtual private network (VPN) encrypts data to provide secure communication over public networks.', answer: 'T' },
+{ type: 'tf', question: 'A gateway connects networks with different protocols.', answer: 'T' },
+{ type: 'tf', question: 'POP3 is used for sending emails from client to server.', answer: 'F' },
+{ type: 'tf', question: 'Bluetooth technology is used for short-range communication between devices.', answer: 'T' },
+{ type: 'tf', question: 'A bus network topology has a single central cable to which all network devices are connected.', answer: 'T' },
+{ type: 'tf', question: 'Fiber-optic cables use electrical signals to transmit data.', answer: 'F' },
+{ type: 'tf', question: 'HTTP is the protocol used for transferring web pages on the Internet.', answer: 'T' },
+{ type: 'tf', question: 'A firewall can be a combination of hardware and software.', answer: 'T' },
+{ type: 'tf', question: 'A star network topology has each device connected to a central hub.', answer: 'T' },
+{ type: 'tf', question: 'SMTP is a protocol used for retrieving emails.', answer: 'F' },
+{ type: 'tf', question: 'Ethernet is the most common type of network cable.', answer: 'T' },
+{ type: 'tf', question: 'An IP address uniquely identifies a device on a network.', answer: 'T' },
+{ type: 'tf', question: 'Telecommuting is working from a remote location outside of a traditional office environment.', answer: 'T' },
+{ type: 'tf', question: 'Wi-Fi is a type of wireless network technology that provides high-speed Internet access.', answer: 'T' },
+{ type: 'tf', question: 'Multimedia messaging service (MMS) is used to send text-only messages.', answer: 'F' },
+{ type: 'tf', question: 'A proxy server can be used to filter web content.', answer: 'T' },
+{ type: 'tf', question: 'The Internet Engineering Task Force (IETF) develops and promotes voluntary Internet standards.', answer: 'T' },
+
+// Multiple Choice Questions
+{ type: 'mc', question: 'Which protocol is used to secure web transactions?', options: ['a) HTTP', 'b) HTTPS', 'c) FTP', 'd) SMTP'], answer: 'b) HTTPS' },
+{ type: 'mc', question: 'What is the primary function of a router?', options: ['a) Connects multiple networks and routes data between them', 'b) Connects devices within a single network', 'c) Translates domain names into IP addresses', 'd) Filters incoming and outgoing network traffic'], answer: 'a) Connects multiple networks and routes data between them' },
+{ type: 'mc', question: 'Which of the following is a high-frequency transmission method for short-range communication?', options: ['a) Wi-Fi', 'b) Bluetooth', 'c) NFC', 'd) LTE'], answer: 'b) Bluetooth' },
+{ type: 'mc', question: 'Which technology allows for secure communication over an unsecured network?', options: ['a) VPN', 'b) LAN', 'c) WAN', 'd) PAN'], answer: 'a) VPN' },
+{ type: 'mc', question: 'What type of network topology connects each device to a single central cable?', options: ['a) Star', 'b) Ring', 'c) Bus', 'd) Mesh'], answer: 'c) Bus' },
+{ type: 'mc', question: 'Which protocol is used to transfer files over the Internet?', options: ['a) HTTP', 'b) FTP', 'c) SMTP', 'd) POP3'], answer: 'b) FTP' },
+{ type: 'mc', question: 'What is the main purpose of a firewall?', options: ['a) To route data between networks', 'b) To filter incoming and outgoing network traffic', 'c) To connect devices within a network', 'd) To translate domain names into IP addresses'], answer: 'b) To filter incoming and outgoing network traffic' },
+{ type: 'mc', question: 'Which of the following is an example of an unguided transmission medium?', options: ['a) Fiber-optic cable', 'b) Coaxial cable', 'c) Twisted-pair cable', 'd) Radio waves'], answer: 'd) Radio waves' },
+{ type: 'mc', question: 'What does the acronym VoIP stand for?', options: ['a) Voice over Internet Protocol', 'b) Video over Internet Protocol', 'c) Virtual over Internet Protocol', 'd) Voice over Intranet Protocol'], answer: 'a) Voice over Internet Protocol' },
+{ type: 'mc', question: 'Which of the following is not a characteristic of fiber-optic cables?', options: ['a) High bandwidth', 'b) Immunity to electromagnetic interference', 'c) Low attenuation', 'd) Electrical conductivity'], answer: 'd) Electrical conductivity' },
+{ type: 'mc', question: 'What does IMAP stand for?', options: ['a) Internet Mail Access Protocol', 'b) Internet Message Access Protocol', 'c) Interactive Mail Access Protocol', 'd) International Mail Access Protocol'], answer: 'b) Internet Message Access Protocol' },
+{ type: 'mc', question: 'Which device is used to extend the range of a wireless network?', options: ['a) Switch', 'b) Router', 'c) Repeater', 'd) Gateway'], answer: 'c) Repeater' },
+{ type: 'mc', question: 'Which of the following protocols is used for secure remote login?', options: ['a) Telnet', 'b) SSH', 'c) FTP', 'd) HTTP'], answer: 'b) SSH' },
+{ type: 'mc', question: 'What type of network spans a city or large campus?', options: ['a) LAN', 'b) MAN', 'c) WAN', 'd) PAN'], answer: 'b) MAN' },
+{ type: 'mc', question: 'Which protocol is used to retrieve emails from a mail server?', options: ['a) SMTP', 'b) POP3', 'c) FTP', 'd) IMAP'], answer: 'd) IMAP' },
+{ type: 'mc', question: 'What does SSL stand for?', options: ['a) Secure Socket Layer', 'b) Secure Software Layer', 'c) Secure Server Layer', 'd) Secure System Layer'], answer: 'a) Secure Socket Layer' },
+{ type: 'mc', question: 'Which technology is commonly used for contactless payment systems?', options: ['a) Bluetooth', 'b) NFC', 'c) Wi-Fi', 'd) LTE'], answer: 'b) NFC' },
+{ type: 'mc', question: 'What is the primary purpose of the OSI model?', options: ['a) To define a network framework for implementing protocols', 'b) To route data packets on the Internet', 'c) To translate domain names into IP addresses', 'd) To connect devices within a local network'], answer: 'a) To define a network framework for implementing protocols' },
+{ type: 'mc', question: 'Which of the following is not a function of a network operating system (NOS)?', options: ['a) Managing network resources', 'b) Providing security for network communications', 'c) Developing software applications', 'd) Supporting network hardware'], answer: 'c) Developing software applications' },
+{ type: 'mc', question: 'Which protocol is used to convert domain names into IP addresses?', options: ['a) TCP', 'b) IP', 'c) DNS', 'd) HTTP'], answer: 'c) DNS' }
+
+
+];
+
+
+
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedTFCount = 0;
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+            shuffleQuestions();
+        });
+
+        function updateRangeValues() {
+            const tfRange = document.getElementById('tfCount');
+            const mcRange = document.getElementById('mcCount');
+            tfRange.max = questions.filter(q => q.type === 'tf').length;
+            mcRange.max = questions.filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function startExam() {
+            selectedTFCount = parseInt(document.getElementById('tfCount').value);
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const tfQuestions = questions.filter(q => q.type === 'tf').slice(0, selectedTFCount);
+            const mcQuestions = questions.filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return [...tfQuestions, ...mcQuestions];
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'tf') {
+                questionElement.innerHTML += `
+                    <label style="display:block;"><input type="radio" name="answer" value="T"> T</label>
+                    <label style="display:block;"><input type="radio" name="answer" value="F"> F</label>
+                `;
+            } else if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = F;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                } else {
+                    correctAnswers.push({ question: question.question, correctAnswer: question.answer, userAnswer: userAnswers[index] });
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = `<div class="result">You scored ${score} out of ${selectedQuestions.length}</div>`;
+
+            if (score === selectedQuestions.length) {
+                resultContainer.innerHTML += '<div class="result">Congratulations! You got a perfect score!</div>';
+            } else {
+                correctAnswers.forEach(({ question, correctAnswer, userAnswer }) => {
+                    resultContainer.innerHTML += `
+                        <div class="result">
+                            <p>Question: ${question}</p>
+                            <p>Correct Answer: ${correctAnswer}</p>
+                            <p>Your Answer: ${userAnswer}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('homeContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+
