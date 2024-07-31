@@ -159,6 +159,13 @@
                     <a href="./ch4_3.html" target="_blank"><button class="test2">ch4_3</button></a>
                     <a href="./ch4_4.html" target="_blank"><button class="test2">ch4_4</button></a>
                 </div>
+                <button class="easy" onclick="toggleTests2()">ch05</button>
+                <div id="ch5" class="hidden test-buttons">
+                    <a href="./ch5_1.html" target="_blank"><button class="test1">ch5_1</button></a>
+                    <a href="./ch5_2.html" target="_blank"><button class="test2">ch5_2</button></a>
+                    <a href="./ch5_3.html" target="_blank"><button class="test2">ch5_3</button></a>
+                    <a href="./ch5_4.html" target="_blank"><button class="test2">ch5_4</button></a>
+                </div>
             </div>
         </div>
     </main>
@@ -175,6 +182,17 @@
             } else {
                 testButtons.classList.remove('visible');
                 testButtons.classList.add('hidden');
+            }
+        }
+
+        function toggleTests2() {
+            const ch5 = document.getElementById('ch5');
+            if (ch5.classList.contains('hidden')) {
+                ch5.classList.remove('hidden');
+                ch5.classList.add('visible');
+            } else {
+                ch5.classList.remove('visible');
+                ch5.classList.add('hidden');
             }
         }
 

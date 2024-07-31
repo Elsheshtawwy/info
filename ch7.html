@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch7</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter7 Exam</h1>
+            <label class="slider-label">Select number of T/F questions:</label>
+            <input type="range" id="tfCount" min="1" max="0" value="5" oninput="updateValue('tfCountValue', this.value)">
+            <span id="tfCountValue">1</span>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+      const questions = [
+  { "type": "tf", "question": "Requirements validation is a mechanical process involving only the checking of documents.", "answer": "F" },
+  { "type": "tf", "question": "The primary goal of requirements validation is to communicate requirements from analysts to stakeholders.", "answer": "F" },
+  { "type": "tf", "question": "Validation only requires stakeholders to check whether the proposed solution will solve their problems.", "answer": "F" },
+  { "type": "tf", "question": "Requirements validation helps stimulate the evolution of the understanding of what is possible for customers.", "answer": "F" },
+  { "type": "tf", "question": "Validation of requirements is aimed solely at ensuring the correctness of specifications with respect to the user's intentions.", "answer": "F" },
+  { "type": "tf", "question": "Achieving agreement among stakeholders on the nature of the problem is not a goal of requirements validation.", "answer": "F" },
+  { "type": "tf", "question": "Validation involves checking for accuracy, consistency, and relevance in meetings using prototypes and graphical models.", "answer": "F" },
+  { "type": "tf", "question": "The later mistakes are discovered, the cheaper they are to correct.", "answer": "F" },
+  { "type": "tf", "question": "Hand checking and ad-hoc reading are both techniques used for requirements validation.", "answer": "F" },
+  { "type": "tf", "question": "Inspection is considered a formal review process that includes a sequence of well-defined stages.", "answer": "F" },
+  { "type": "tf", "question": "During the preparation phase of an inspection, the inspectors collaborate in teams to identify issues.", "answer": "F" },
+  { "type": "tf", "question": "Each inspector works with the inspected document individually during the preparation phase of an inspection.", "answer": "F" },
+  { "type": "tf", "question": "Ad-hoc reading involves using guidance provided by checklists to identify defects.", "answer": "F" },
+  { "type": "tf", "question": "Checklist-based reading uses a predefined list of questions to identify specific issues in the document.", "answer": "F" },
+  { "type": "tf", "question": "Defect-based reading aims to detect specific types of defects by using different procedures assigned to different reviewers.", "answer": "F" },
+  { "type": "tf", "question": "Perspective-based reading involves each reviewer using their own knowledge and experience without guidance.", "answer": "F" },
+  { "type": "tf", "question": "A requirement should be written at a consistent and appropriate level of detail according to the checklist example.", "answer": "F" },
+  { "type": "tf", "question": "The implementation priority of each requirement is not necessary according to the checklist example.", "answer": "F" },
+  { "type": "tf", "question": "Requirements must be verifiable by testing, review, or analysis according to the checklist example.", "answer": "F" },
+  { "type": "tf", "question": "It is acceptable for requirements to conflict with or duplicate other requirements if they are within the project's scope.", "answer": "F" },
+  { "type": "tf", "question": "Each software functional requirement should be uniquely and correctly identified to ensure traceability.", "answer": "F" },
+  { "type": "tf", "question": "All requirements should be actual requirements and not design or implementation solutions.", "answer": "F" },
+  { "type": "tf", "question": "Time-critical functions should be identified and timing criteria specified according to the special issues checklist.", "answer": "F" },
+  { "type": "tf", "question": "Scenario-based reading involves reviewing a set of abstract scenarios to identify requirement statements.", "answer": "F" },
+  { "type": "tf", "question": "In scenario-based reading, reviewers examine the requirements document against concrete scenarios.", "answer": "F" },
+  { "type": "tf", "question": "A requirement is unambiguous if there is more than one way to interpret it.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall be implemented using ASP' is considered ambiguous.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall not accept passwords longer than 15 characters' is clear and precise.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall not accept passwords longer than 15 characters' should specify the exact action when this limit is exceeded.", "answer": "F" },
+  { "type": "tf", "question": "Testable requirements must be clear, precise, and unambiguous.", "answer": "F" },
+  { "type": "tf", "question": "A requirement is considered testable if the criteria are not explicitly listed.", "answer": "F" },
+  { "type": "tf", "question": "Requirements should be stated clearly and simply, avoiding unnecessary information.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall identify the airport based on either an Airport Code or a City Name' is an example of clear requirements.", "answer": "F" },
+  { "type": "tf", "question": "A requirement is considered unnecessary if removing it would not affect the system.", "answer": "F" },
+  { "type": "tf", "question": "Requirements added by developers because they think users would like them are always necessary.", "answer": "F" },
+  { "type": "tf", "question": "Conflicts between requirements may be direct or indirect.", "answer": "F" },
+  { "type": "tf", "question": "If one requirement specifies dates in the mm/dd/yyyy format and another specifies dd/mm/yyyy format, this is an acceptable conflict.", "answer": "F" },
+  { "type": "tf", "question": "Resolving conflicts between requirements might involve specifying formats based on user preferences.", "answer": "F" },
+  { "type": "tf", "question": "A requirement should be complete if it covers all possible conditions that can occur.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'For overseas flights, the system shall display a destination country' is complete if it does not specify how to handle flights to Canada and Mexico.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'Dates shall be displayed based on the format defined in the user’s web browser' resolves potential conflicts by accommodating user preferences.", "answer": "F" },
+  { "type": "tf", "question": "All requirements should be specified for all possible scenarios, including edge cases.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system will display the airport code or the city name' is an example of a requirement that is unnecessarily detailed.", "answer": "F" },
+  { "type": "tf", "question": "Defect-based reading involves detecting specific types of defects using different procedures assigned to different reviewers.", "answer": "F" },
+  { "type": "tf", "question": "Perspective-based reading involves using a checklist to review requirements from a particular stakeholder's viewpoint.", "answer": "F" },
+  { "type": "tf", "question": "In inspection, each inspector should work together with other team members during the preparation phase.", "answer": "F" },
+  { "type": "tf", "question": "Ad-hoc reading does not use guidance and relies solely on the reviewer's knowledge.", "answer": "F" },
+  { "type": "tf", "question": "The clarity of requirements is enhanced by including unnecessary information that provides additional context.", "answer": "F" },
+  { "type": "tf", "question": "Testable requirements should avoid using vague terms such as 'etc.'", "answer": "F" },
+  { "type": "tf", "question": "Requirements should be written with as much detail as possible, regardless of clarity.", "answer": "F" },
+  { "type": "tf", "question": "A requirement is considered correct if it is consistent with all other requirements.", "answer": "F" },
+  { "type": "tf", "question": "Requirement inconsistencies should always be resolved by rewriting the requirements for clarity.", "answer": "F" },
+  { "type": "tf", "question": "A requirement that does not specify the implementation priority is acceptable if it is clear and concise.", "answer": "F" },
+  { "type": "tf", "question": "The effectiveness of a requirement is not affected by the completeness of its description.", "answer": "F" },
+  { "type": "tf", "question": "The system should include all necessary hardware and software interfaces as defined in the requirements.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall identify the airport based on either an Airport Code or a City Name' demonstrates clarity and completeness.", "answer": "F" },
+  { "type": "tf", "question": "All requirements should address every possible condition that could occur in the system.", "answer": "F" },
+  { "type": "tf", "question": "The presence of multiple conflicting requirements is acceptable if the conflict can be resolved later.", "answer": "F" },
+  { "type": "tf", "question": "A requirement's completeness is judged by its ability to handle both typical and edge-case scenarios.", "answer": "F" },
+  { "type": "tf", "question": "Ad-hoc reading is guided by a checklist provided to reviewers.", "answer": "F" },
+  { "type": "tf", "question": "Scenario-based reading helps in identifying whether requirements cover practical use cases and scenarios.", "answer": "F" },
+  { "type": "tf", "question": "The checklist example includes evaluating whether all requirements provide an adequate basis for design.", "answer": "F" },
+  { "type": "tf", "question": "Each requirement should be written in ambiguous language to allow for broader interpretation.", "answer": "F" },
+  { "type": "tf", "question": "A requirement that allows for multiple interpretations can lead to potential issues in implementation.", "answer": "F" },
+  { "type": "tf", "question": "Checklist-based reading ensures that reviewers focus on a predefined set of questions during the validation process.", "answer": "F" },
+  { "type": "tf", "question": "The effectiveness of defect-based reading is increased by having reviewers follow a specific procedure tailored to different types of defects.", "answer": "F" },
+  { "type": "tf", "question": "Consistency between requirements can be verified by ensuring they all use the same format.", "answer": "F" },
+  { "type": "tf", "question": "Inspection is a formal review process that includes a sequence of stages to identify and address issues in requirements.", "answer": "F" },
+  { "type": "tf", "question": "In inspection, the preparation phase involves group discussions to identify issues.", "answer": "F" },
+  { "type": "tf", "question": "Defect-based reading aims to identify specific types of defects through tailored procedures.", "answer": "F" },
+  { "type": "tf", "question": "A requirement should be necessary if it is not needed by any stakeholders.", "answer": "F" },
+  { "type": "tf", "question": "Scenario-based reading involves walking through concrete scenarios to ensure all requirements are covered.", "answer": "F" },
+  { "type": "tf", "question": "Clear and concise requirements are essential for effective validation and implementation.", "answer": "F" },
+  { "type": "tf", "question": "A requirement is considered complete if it includes information about known customer or system needs.", "answer": "F" },
+  { "type": "tf", "question": "The inclusion of timing criteria is essential for requirements involving time-critical functions.", "answer": "F" },
+  { "type": "tf", "question": "The presence of ambiguous terms in requirements does not affect their testability.", "answer": "F" },
+  { "type": "tf", "question": "Ad-hoc reading relies on the reviewer's prior experience and knowledge to identify defects without guidance.", "answer": "F" },
+  { "type": "tf", "question": "Perspective-based reading involves reviewing requirements from the viewpoint of different stakeholders.", "answer": "F" },
+  { "type": "tf", "question": "The checklist example suggests that requirements should not be checked for consistency with other requirements.", "answer": "F" },
+  { "type": "tf", "question": "A requirement that specifies how to handle edge cases demonstrates completeness.", "answer": "F" },
+  { "type": "tf", "question": "Validation does not involve ensuring that requirements are consistent with each other.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall truncate the entered string to 15 characters' is an example of a clear and testable requirement.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall understand either Airport Code or City Name' is unnecessarily detailed.", "answer": "F" },
+  { "type": "tf", "question": "The goal of scenario-based reading is to ensure that requirements are correct and complete through concrete scenarios.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall display dates in the format specified by the user’s web browser' resolves conflicts by accommodating user preferences.", "answer": "F" },
+  { "type": "tf", "question": "A requirement that lacks clarity can still be effective if it is tested thoroughly.", "answer": "F" },
+  { "type": "tf", "question": "In perspective-based reading, each procedure is based on the viewpoint of a specific stakeholder.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'Dates shall be displayed in the mm/dd/yyyy format' is complete if it specifies the format clearly.", "answer": "F" },
+  { "type": "tf", "question": "Consistency in requirements can be verified by ensuring that there are no conflicts in the specified formats.", "answer": "F" },
+  { "type": "tf", "question": "The checklist for completeness includes verifying if any necessary information is missing from a requirement.", "answer": "F" },
+  { "type": "tf", "question": "Requirements that include external interfaces and priorities provide a complete basis for design.", "answer": "F" },
+  { "type": "tf", "question": "Requirements validation involves ensuring that all defects are identified during the inspection phase.", "answer": "F" },
+  { "type": "tf", "question": "Ad-hoc reading involves structured procedures to identify defects.", "answer": "F" },
+  { "type": "tf", "question": "Each requirement should be checked to ensure it is necessary and adds value to the system.", "answer": "F" },
+  { "type": "tf", "question": "The inclusion of detailed implementation solutions in requirements is acceptable as long as they are clearly stated.", "answer": "F" },
+  { "type": "tf", "question": "The goal of the inspection process is to review requirements through a structured approach involving multiple perspectives.", "answer": "F" },
+  { "type": "tf", "question": "The clarity of requirements is enhanced by avoiding the use of ambiguous language and unnecessary details.", "answer": "F" },
+  { "type": "tf", "question": "Requirements should be written in a way that allows multiple interpretations to accommodate different viewpoints.", "answer": "F" },
+  { "type": "tf", "question": "The checklist example includes verifying if requirements are clear, concise, and unambiguous.", "answer": "F" },
+  { "type": "tf", "question": "Inspection involves identifying defects through ad-hoc methods rather than structured stages.", "answer": "F" },
+  { "type": "tf", "question": "Scenario-based reading can help identify whether requirements are sufficiently covered by walking through specific use cases.", "answer": "F" },
+  { "type": "tf", "question": "The checklist for correctness includes verifying if each requirement is written in clear and concise language.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall not let the user enter more than 15 characters' is clear if it does not specify the action when the limit is exceeded.", "answer": "F" },
+  { "type": "tf", "question": "The completeness of a requirement is judged by ensuring it covers all conditions that can occur.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall identify the airport based on either an Airport Code or a City Name' demonstrates a complete specification.", "answer": "F" },
+  { "type": "tf", "question": "Consistency in requirements ensures that all requirements are aligned with each other and do not conflict.", "answer": "F" },
+  { "type": "tf", "question": "A requirement that does not specify implementation priorities can be considered complete if other aspects are clear.", "answer": "F" },
+  { "type": "tf", "question": "Validation ensures that requirements are tested and reviewed to confirm they meet the user's needs.", "answer": "F" },
+  { "type": "tf", "question": "The effectiveness of defect-based reading is increased by having a checklist that reviewers follow.", "answer": "F" },
+  { "type": "tf", "question": "Ad-hoc reading relies on the reviewer's knowledge and experience without using a checklist or predefined guidance.", "answer": "F" },
+  { "type": "tf", "question": "Scenario-based reading involves examining the requirements document based on a series of abstract scenarios.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall truncate the entered string to 15 characters' is an example of a precise and testable requirement.", "answer": "F" },
+  { "type": "tf", "question": "A requirement should be unnecessary if it adds no value to the system or if stakeholders do not need it.", "answer": "F" },
+  { "type": "tf", "question": "Ad-hoc reading involves using predefined checklists to guide the review process.", "answer": "F" },
+  { "type": "tf", "question": "The clarity of requirements is improved by including unnecessary details to cover all possible interpretations.", "answer": "F" },
+  { "type": "tf", "question": "Each requirement should be written to avoid ambiguity and ensure clear interpretation.", "answer": "F" },
+  { "type": "tf", "question": "Requirements validation is solely about identifying defects in the specification document.", "answer": "F" },
+  { "type": "tf", "question": "Perspective-based reading helps in identifying defects from the viewpoint of different stakeholders.", "answer": "F" },
+  { "type": "tf", "question": "The checklist example for organization includes checking if all external hardware, software, and communication interfaces are defined.", "answer": "F" },
+  { "type": "tf", "question": "The requirement 'The system shall display dates in the format defined in the user's web browser' is clear if it accommodates user preferences.", "answer": "F" },
+  { "type": "tf", "question": "Requirements that include contradictory details can be resolved by rewriting them based on specific user contexts.", "answer": "F" },
+  { "type": "tf", "question": "A requirement that does not address every possible condition is considered complete.", "answer": "F" },
+  { "type": "tf", "question": "The checklist for correctness involves verifying if the requirements can be implemented within known constraints.", "answer": "F" },
+  { "type": "tf", "question": "Requirements validation ensures that all identified issues are corrected before the inspection phase.", "answer": "F" },
+  {"type": "mc",  "question": "What is the primary goal of requirements validation?","options": ["A. To check for spelling errors in the requirements document",
+      "B. To ensure that the requirements are correctly communicated and agreed upon by all stakeholders",
+      "C. To create detailed design documents",
+      "D. To implement the solution proposed in the requirements"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which activity is NOT typically involved in requirements validation?",
+    "options": [
+      "A. Checking for accuracy and consistency",
+      "B. Creating prototypes and graphical models",
+      "C. Developing code based on requirements",
+      "D. Conducting meetings with stakeholders"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "Which technique for requirements validation involves a team working with the document independently before group discussions?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Defect-based reading",
+      "C. Inspection",
+      "D. Scenario-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "In inspection, what is the purpose of the 'preparation' phase?",
+    "options": [
+      "A. To conduct group discussions about identified issues",
+      "B. To identify most of the problems in the document",
+      "C. To finalize the requirements specification",
+      "D. To implement changes based on feedback"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What does 'defect-based reading' focus on?",
+    "options": [
+      "A. Identifying defects based on a specific type of defect",
+      "B. Reviewing documents based on personal experience",
+      "C. Ensuring requirements cover all scenarios",
+      "D. Verifying the consistency of the requirements"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which reading technique provides a list of questions to guide the review process?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Scenario-based reading",
+      "C. Checklist-based reading",
+      "D. Perspective-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What does 'scenario-based reading' involve?",
+    "options": [
+      "A. Creating a list of requirements to be checked",
+      "B. Walking through a set of concrete scenarios to examine the requirements document",
+      "C. Reading through the document without guidance",
+      "D. Focusing on identifying a specific type of defect"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "How is 'perspective-based reading' different from other validation techniques?",
+    "options": [
+      "A. It involves using predefined checklists",
+      "B. It is based on the viewpoint of different stakeholders",
+      "C. It focuses on ad-hoc reviews without guidance",
+      "D. It uses prototypes and graphical models for validation"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which characteristic is essential for a requirement to be considered 'clear'?",
+    "options": [
+      "A. It allows for multiple interpretations",
+      "B. It includes detailed implementation solutions",
+      "C. It is stated simply and directly without unnecessary information",
+      "D. It is written in complex technical language"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What is the role of 'checklists' in requirements validation?",
+    "options": [
+      "A. To verify the implementation of requirements",
+      "B. To guide reviewers in evaluating specific properties of the document",
+      "C. To provide a final approval for the requirements",
+      "D. To create prototypes and graphical models"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which of the following is NOT a component typically evaluated by checklists?",
+    "options": [
+      "A. Completeness of requirements",
+      "B. Implementation priority of requirements",
+      "C. Technical performance of the solution",
+      "D. Consistency with other requirements"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "Why is it important to ensure that requirements are 'testable'?",
+    "options": [
+      "A. To verify that requirements are consistent with design documents",
+      "B. To allow testers to determine if the requirements are implemented correctly",
+      "C. To make sure that requirements include implementation details",
+      "D. To facilitate the creation of prototypes"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which technique involves creating a team of inspectors from different perspectives?",
+    "options": [
+      "A. Defect-based reading",
+      "B. Ad-hoc reading",
+      "C. Inspection",
+      "D. Scenario-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What does the requirement 'The system shall identify the airport based on either an Airport Code or a City Name' demonstrate?",
+    "options": [
+      "A. Ambiguity in requirements",
+      "B. Lack of clarity in the requirement",
+      "C. Completeness in handling different inputs",
+      "D. Need for additional details"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What is an example of a requirement that is 'unambiguous'?",
+    "options": [
+      "A. 'The system shall accept passwords of any length.'",
+      "B. 'The system shall not accept passwords longer than 15 characters; an error message shall be displayed if the limit is exceeded.'",
+      "C. 'The system may accept passwords of varying lengths.'",
+      "D. 'The system should accept passwords up to a certain length.'"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What is a key indicator of 'completeness' in a requirement?",
+    "options": [
+      "A. It includes information about all external interfaces.",
+      "B. It provides a detailed design solution.",
+      "C. It covers all conditions and scenarios that might occur.",
+      "D. It includes specific implementation details."
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "Which requirement is considered 'consistent'?",
+    "options": [
+      "A. 'Dates shall be displayed in the mm/dd/yyyy format.' and 'Dates shall be displayed in the dd/mm/yyyy format.'",
+      "B. 'Dates shall be displayed in the format defined in the user's web browser.'",
+      "C. 'The system will display dates based on user preferences.'",
+      "D. 'The system shall display dates in various formats based on user settings.'"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What should be done if a requirement is identified as 'unnecessary'?",
+    "options": [
+      "A. It should be retained for potential future use.",
+      "B. It should be included in the final requirements document.",
+      "C. It should be removed if it does not affect the system or is not needed by stakeholders.",
+      "D. It should be reviewed again to determine its importance."
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What is NOT a goal of 'ad-hoc reading'?",
+    "options": [
+      "A. Using a checklist to identify defects",
+      "B. Relying on the reviewer's own knowledge and experience",
+      "C. Identifying defects without predefined guidance",
+      "D. Reviewing the document based on personal expertise"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "How can conflicts in requirements be resolved according to the document?",
+    "options": [
+      "A. By ignoring minor conflicts and focusing on major ones",
+      "B. By revising requirements to accommodate user preferences or specific contexts",
+      "C. By creating a new requirement that overrides conflicting ones",
+      "D. By keeping the conflicting requirements and documenting them"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What is the primary purpose of 'scenario-based reading'?",
+    "options": [
+      "A. To review the requirements based on a checklist",
+      "B. To identify defects through personal experience",
+      "C. To ensure requirements cover specific scenarios and use cases",
+      "D. To validate the clarity of the requirement descriptions"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "Which of the following requirements is 'testable'?",
+    "options": [
+      "A. 'The system should have good performance.'",
+      "B. 'The system shall process transactions within 2 seconds.'",
+      "C. 'The system must be user-friendly.'",
+      "D. 'The system should be secure.'"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which aspect is NOT directly evaluated by 'checklists' during requirements validation?",
+    "options": [
+      "A. The implementation priority of each requirement",
+      "B. The completeness of external hardware and software interfaces",
+      "C. The detailed design solutions for requirements",
+      "D. The correctness and consistency of requirements"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What is the goal of 'defect-based reading'?",
+    "options": [
+      "A. To identify a specific type of defect in the requirements",
+      "B. To review the document without specific focus",
+      "C. To ensure that all requirements are implemented correctly",
+      "D. To validate the overall clarity of the requirements"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which of the following statements best describes 'clear' requirements?",
+    "options": [
+      "A. Requirements that include complex technical jargon",
+      "B. Requirements that are written with as much detail as possible",
+      "C. Requirements that are straightforward and free from unnecessary details",
+      "D. Requirements that cover multiple possible interpretations"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What should be done if a requirement does not align with the user's goals?",
+    "options": [
+      "A. It should be modified to align with the user's goals",
+      "B. It should be kept as it is to maintain the original design",
+      "C. It should be ignored if it does not affect the system",
+      "D. It should be added to the documentation as an additional requirement"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which of the following is NOT a technique for requirements validation mentioned in the document?",
+    "options": [
+      "A. Scenario-based reading",
+      "B. Ad-hoc reading",
+      "C. Prototyping",
+      "D. Defect-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What is the significance of including implementation priorities in requirements?",
+    "options": [
+      "A. To ensure that requirements are implemented in the specified order",
+      "B. To provide a basis for designing the system architecture",
+      "C. To help in resolving conflicts between requirements",
+      "D. To aid in creating a detailed design document"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which reading technique is characterized by using a list of questions to guide the review process?",
+    "options": [
+      "A. Scenario-based reading",
+      "B. Defect-based reading",
+      "C. Checklist-based reading",
+      "D. Ad-hoc reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "How does 'perspective-based reading' contribute to requirements validation?",
+    "options": [
+      "A. By using predefined checklists for validation",
+      "B. By reviewing from the viewpoint of various stakeholders",
+      "C. By focusing on specific defects in the document",
+      "D. By ensuring that all requirements are implemented correctly"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which characteristic indicates that a requirement is 'necessary'?",
+    "options": [
+      "A. It is added by developers based on their assumptions",
+      "B. It is needed by stakeholders and affects the system",
+      "C. It includes additional features not requested by users",
+      "D. It covers multiple possible user preferences"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What does the requirement 'The system shall not accept passwords longer than 15 characters' illustrate about 'clarity'?",
+    "options": [
+      "A. It is ambiguous about how the system should handle excess characters",
+      "B. It is clear and specifies the action to be taken when the limit is exceeded",
+      "C. It includes unnecessary details about password length",
+      "D. It requires further clarification to ensure clear implementation"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which of the following requirements is considered 'consistent' with respect to user preferences?",
+    "options": [
+      "A. 'Dates shall be displayed in the format specified by the user’s web browser.'",
+      "B. 'The system will display dates in the mm/dd/yyyy format for all users.'",
+      "C. 'Dates shall be displayed in the dd/mm/yyyy format for international users.'",
+      "D. 'The system will display dates based on user settings in various formats.'"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which aspect is NOT typically checked during the 'organization and completeness' phase of checklist-based reading?",
+    "options": [
+      "A. Whether all external hardware and software interfaces are defined",
+      "B. Whether each requirement is written at a consistent level of detail",
+      "C. Whether the requirements provide a basis for design",
+      "D. Whether the requirements are implemented within constraints"
+    ],
+    "answer": "D"
+  },
+  {"type": "mc",
+    "question": "What does the requirement 'The system shall display a destination country for overseas flights' fail to address?",
+    "options": [
+      "A. Flights to Canada and Mexico",
+      "B. The specific format for displaying dates",
+      "C. The priority of the requirement",
+      "D. The level of detail required for implementation"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which technique for requirements validation involves a formal review process with a sequence of stages?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Scenario-based reading",
+      "C. Inspection",
+      "D. Perspective-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What is a key benefit of using 'checklists' during requirements validation?",
+    "options": [
+      "A. To provide a final approval for the requirements",
+      "B. To identify and address specific issues systematically",
+      "C. To develop detailed design solutions",
+      "D. To implement the requirements in the system"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which of the following is NOT a feature of a 'testable' requirement?",
+    "options": [
+      "A. It is clear and precise",
+      "B. It includes specific criteria for verification",
+      "C. It is ambiguous and open to interpretation",
+      "D. It can be verified through testing, review, or analysis"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "How can 'ad-hoc reading' be described?",
+    "options": [
+      "A. Using a predefined checklist to guide the review",
+      "B. Reviewing the document based on personal knowledge and experience",
+      "C. Walking through specific scenarios to validate the requirements",
+      "D. Focusing on detecting specific types of defects"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What does 'defect-based reading' involve focusing on?",
+    "options": [
+      "A. Identifying all possible defects",
+      "B. Detecting a specific type of defect within the requirements",
+      "C. Reviewing the document without any specific focus",
+      "D. Validating the clarity of requirements"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which reading technique involves evaluating the requirements based on a set of concrete scenarios?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Defect-based reading",
+      "C. Scenario-based reading",
+      "D. Perspective-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "Which technique is characterized by the reviewer's use of their own knowledge and experience without guidance?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Checklist-based reading",
+      "C. Defect-based reading",
+      "D. Scenario-based reading"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which type of reading is best for identifying defects from different stakeholder viewpoints?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Perspective-based reading",
+      "C. Defect-based reading",
+      "D. Checklist-based reading"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What does 'consistency' in requirements imply?",
+    "options": [
+      "A. There are no conflicts between requirements",
+      "B. All requirements are implemented according to design specifications",
+      "C. The requirements are written in complex language",
+      "D. The requirements cover all possible conditions"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which aspect is evaluated during the 'correctness' phase of checklist-based reading?",
+    "options": [
+      "A. Whether the requirements are testable",
+      "B. Whether the requirements conflict with or duplicate others",
+      "C. Whether the requirements provide an adequate basis for design",
+      "D. Whether the requirements are written at a consistent level of detail"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What should be done if a requirement includes unnecessary information?",
+    "options": [
+      "A. It should be revised to remove the unnecessary details",
+      "B. It should be kept as it is to maintain completeness",
+      "C. It should be included in the final requirements document",
+      "D. It should be added to a separate section of the document"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which of the following is NOT a technique for 'ad-hoc reading'?",
+    "options": [
+      "A. Using personal experience to identify defects",
+      "B. Utilizing a checklist to guide the review",
+      "C. Reviewing the document without predefined guidance",
+      "D. Relying on intuition to find defects"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which requirement is NOT considered 'testable'?",
+    "options": [
+      "A. 'The system shall process transactions within 5 seconds.'",
+      "B. 'The system should be user-friendly.'",
+      "C. 'The system shall handle up to 1000 simultaneous users.'",
+      "D. 'The system must be reliable.'"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What is a common goal of 'scenario-based reading'?",
+    "options": [
+      "A. To ensure the requirements cover all use cases",
+      "B. To identify defects based on predefined checklists",
+      "C. To validate requirements against implementation details",
+      "D. To review requirements based on personal experience"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which aspect of requirements validation focuses on 'unnecessary' requirements?",
+    "options": [
+      "A. Identifying defects based on user scenarios",
+      "B. Using checklists to guide the review",
+      "C. Determining if all requirements are needed and relevant",
+      "D. Validating the clarity and consistency of requirements"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What is a key characteristic of 'ad-hoc reading'?",
+    "options": [
+      "A. Using a formal checklist for the review",
+      "B. Relying on the reviewer's personal knowledge and experience",
+      "C. Following a structured inspection process",
+      "D. Evaluating requirements based on specific defects"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What is the primary purpose of validation in requirements engineering?",
+    "options": [
+      "A. To verify that the solution meets the stakeholders' needs",
+      "B. To check for document accuracy",
+      "C. To ensure all requirements are technically feasible",
+      "D. To finalize the design specifications"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which technique is specifically used to detect defects based on a particular type?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Checklist-based reading",
+      "C. Defect-based reading",
+      "D. Perspective-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What does the term 'scenario-based reading' imply in the context of requirements validation?",
+    "options": [
+      "A. Evaluating requirements through hypothetical scenarios",
+      "B. Reading the document without any specific focus",
+      "C. Identifying defects through defect-based reading",
+      "D. Using personal experience to guide the review"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which phase of requirements validation involves reviewing documents individually before a meeting?",
+    "options": [
+      "A. Preparation phase",
+      "B. Inspection phase",
+      "C. Ad-hoc reading phase",
+      "D. Checklist-based reading phase"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What is a key characteristic of 'perspective-based reading'?",
+    "options": [
+      "A. It involves a team of inspectors reviewing from different viewpoints",
+      "B. It uses predefined checklists for defect identification",
+      "C. It focuses on identifying specific defects",
+      "D. It relies on the reviewer's personal knowledge"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Why is 'consistency' important in requirements documentation?",
+    "options": [
+      "A. To ensure there are no conflicts between requirements",
+      "B. To guarantee that all requirements are implemented",
+      "C. To maintain a high level of detail in the requirements",
+      "D. To validate the technical feasibility of each requirement"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which type of reading technique involves using a set of predefined questions to guide the review?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Defect-based reading",
+      "C. Checklist-based reading",
+      "D. Scenario-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "How does 'ad-hoc reading' differ from 'checklist-based reading'?",
+    "options": [
+      "A. Ad-hoc reading uses personal knowledge, while checklist-based reading follows a predefined set of questions",
+      "B. Ad-hoc reading involves predefined checklists, while checklist-based reading is unstructured",
+      "C. Ad-hoc reading focuses on defects, while checklist-based reading does not",
+      "D. Ad-hoc reading is used for final approval, while checklist-based reading is for initial review"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which requirement validation technique involves a formal review process with defined stages?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Scenario-based reading",
+      "C. Inspection",
+      "D. Perspective-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What does a requirement being 'testable' mean?",
+    "options": [
+      "A. It can be evaluated through specific testing procedures",
+      "B. It is written in complex technical language",
+      "C. It includes multiple possible interpretations",
+      "D. It covers various user scenarios"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which reading technique focuses on defects from the viewpoint of different stakeholders?",
+    "options": [
+      "A. Defect-based reading",
+      "B. Perspective-based reading",
+      "C. Ad-hoc reading",
+      "D. Scenario-based reading"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What should be considered when evaluating 'completeness' in requirements?",
+    "options": [
+      "A. Whether all conditions and scenarios are covered",
+      "B. Whether the requirements are testable",
+      "C. Whether the requirements are free from ambiguity",
+      "D. Whether all external interfaces are defined"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which of the following does NOT contribute to a requirement being 'clear'?",
+    "options": [
+      "A. The requirement is written using straightforward language",
+      "B. The requirement contains detailed explanations",
+      "C. The requirement has multiple interpretations",
+      "D. The requirement avoids unnecessary details"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What is the main focus of 'defect-based reading'?",
+    "options": [
+      "A. Detecting specific types of defects",
+      "B. Reviewing requirements from different perspectives",
+      "C. Evaluating requirements based on user scenarios",
+      "D. Using personal knowledge for defect identification"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "In which phase of inspection are most problems identified?",
+    "options": [
+      "A. During the inspection meeting",
+      "B. In the preparation phase",
+      "C. During ad-hoc reading",
+      "D. In checklist-based reading"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What is the role of 'checklists' in requirements validation?",
+    "options": [
+      "A. To systematically identify and address specific issues",
+      "B. To provide a final approval of the requirements",
+      "C. To evaluate the overall design of the system",
+      "D. To implement the requirements in the system"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which technique helps in ensuring that requirements are implemented within known constraints?",
+    "options": [
+      "A. Defect-based reading",
+      "B. Checklist-based reading",
+      "C. Ad-hoc reading",
+      "D. Scenario-based reading"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "What should be done if requirements conflict with each other?",
+    "options": [
+      "A. The conflicting requirements should be revised or clarified",
+      "B. The requirements should be ignored if they do not affect the system",
+      "C. The requirements should be added to the documentation as additional notes",
+      "D. The requirements should be finalized without any changes"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which characteristic of a requirement ensures it is free from multiple interpretations?",
+    "options": [
+      "A. Testability",
+      "B. Clarity",
+      "C. Consistency",
+      "D. Necessity"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which reading technique involves evaluating requirements based on real-world scenarios?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Perspective-based reading",
+      "C. Scenario-based reading",
+      "D. Defect-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "How can 'ad-hoc reading' impact the requirements validation process?",
+    "options": [
+      "A. It can provide insights based on personal experience but lacks structured guidance",
+      "B. It ensures that all defects are systematically identified and addressed",
+      "C. It focuses on validating requirements against predefined checklists",
+      "D. It involves formal review processes with multiple stages"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What does the requirement 'The system must be reliable' fail to specify?",
+    "options": [
+      "A. The specific criteria for reliability",
+      "B. The technical feasibility of the requirement",
+      "C. The level of detail required for implementation",
+      "D. The external interfaces needed for the system"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which aspect of 'correctness' in requirements validation involves checking for duplicates?",
+    "options": [
+      "A. Ensuring requirements are free from conflicts",
+      "B. Verifying the implementation constraints",
+      "C. Checking for any conflicting or duplicate requirements",
+      "D. Validating the clarity and precision of requirements"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What does 'perspective-based reading' focus on during requirements validation?",
+    "options": [
+      "A. Identifying defects from various stakeholder viewpoints",
+      "B. Evaluating requirements based on a predefined checklist",
+      "C. Using personal experience to guide the review",
+      "D. Ensuring all requirements are testable"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What is the main difference between 'scenario-based reading' and 'defect-based reading'?",
+    "options": [
+      "A. Scenario-based reading uses specific scenarios, while defect-based reading focuses on specific defect types",
+      "B. Scenario-based reading uses predefined checklists, while defect-based reading relies on personal experience",
+      "C. Scenario-based reading is used for final approval, while defect-based reading is for initial review",
+      "D. Scenario-based reading involves formal review stages, while defect-based reading does not"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which technique involves a review process where each inspector works independently before discussing issues?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Scenario-based reading",
+      "C. Checklist-based reading",
+      "D. Inspection"
+    ],
+    "answer": "D"
+  },
+  {"type": "mc",
+    "question": "How does 'checklist-based reading' enhance the requirements validation process?",
+    "options": [
+      "A. By guiding the review with a list of questions to address specific issues",
+      "B. By allowing reviewers to use their personal knowledge without guidance",
+      "C. By focusing on defects based on user scenarios",
+      "D. By providing a formal review process with well-defined stages"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What should be done if a requirement is found to be unnecessary?",
+    "options": [
+      "A. It should be removed if it does not impact the system or stakeholder needs",
+      "B. It should be kept as a reference for future enhancements",
+      "C. It should be included in the documentation with an explanation",
+      "D. It should be revised to meet technical specifications"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which characteristic ensures a requirement can be verified through testing, review, or analysis?",
+    "options": [
+      "A. Testability",
+      "B. Clarity",
+      "C. Consistency",
+      "D. Necessity"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What does 'correctness' in requirements validation ensure?",
+    "options": [
+      "A. Requirements do not conflict with each other and are verifiable",
+      "B. Requirements are implemented within known constraints",
+      "C. Requirements cover all possible scenarios",
+      "D. Requirements are free from any unnecessary details"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which technique involves reading through the document without specific guidance to identify defects?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Checklist-based reading",
+      "C. Defect-based reading",
+      "D. Scenario-based reading"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What is the primary focus of 'inspection' in requirements validation?",
+    "options": [
+      "A. Formal review with a sequence of well-defined stages",
+      "B. Identifying defects based on personal knowledge",
+      "C. Evaluating requirements using predefined checklists",
+      "D. Reviewing requirements from different stakeholder perspectives"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "How does 'traceability' contribute to requirements validation?",
+    "options": [
+      "A. Ensuring each requirement can be traced back to specific functional needs",
+      "B. Verifying the accuracy and consistency of requirements",
+      "C. Ensuring requirements are testable and clear",
+      "D. Identifying defects based on specific scenarios"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What should be the basis for evaluating 'completeness' in requirements documentation?",
+    "options": [
+      "A. All possible conditions and scenarios should be covered",
+      "B. All requirements should be testable and verifiable",
+      "C. All requirements should be consistent and free from conflicts",
+      "D. All requirements should be clear and unambiguous"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which aspect of requirements validation involves reviewing the document for ambiguity and clarity?",
+    "options": [
+      "A. Clarity",
+      "B. Testability",
+      "C. Consistency",
+      "D. Necessity"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What does 'consistency' in requirements documentation ensure?",
+    "options": [
+      "A. There are no conflicts or contradictions between requirements",
+      "B. All requirements are testable and clear",
+      "C. All requirements cover all possible scenarios",
+      "D. All requirements are detailed and complete"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which requirement validation technique involves walking through scenarios to check for requirement coverage?",
+    "options": [
+      "A. Scenario-based reading",
+      "B. Defect-based reading",
+      "C. Ad-hoc reading",
+      "D. Checklist-based reading"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What does the requirement 'The system shall identify the airport based on either an Airport Code or a City Name' exemplify?",
+    "options": [
+      "A. Clear and unambiguous requirement",
+      "B. Complex and ambiguous requirement",
+      "C. Requirement with multiple interpretations",
+      "D. Requirement that is not testable"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which of the following is NOT a characteristic of 'good requirements'?",
+    "options": [
+      "A. They are clear and precise",
+      "B. They cover all possible user scenarios",
+      "C. They contain detailed explanations and assumptions",
+      "D. They are free from ambiguity and unnecessary details"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "How does 'defect-based reading' support the requirements validation process?",
+    "options": [
+      "A. By focusing on detecting specific types of defects",
+      "B. By providing a formal review process with well-defined stages",
+      "C. By using personal knowledge to identify issues",
+      "D. By ensuring requirements are clear and testable"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What is the role of 'checklists' in ensuring requirements are 'complete'?",
+    "options": [
+      "A. To verify that all possible conditions and scenarios are addressed",
+      "B. To ensure that requirements are free from conflicts",
+      "C. To validate the technical feasibility of requirements",
+      "D. To evaluate requirements based on specific defects"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which technique ensures that requirements are reviewed from different stakeholder perspectives?",
+    "options": [
+      "A. Perspective-based reading",
+      "B. Ad-hoc reading",
+      "C. Defect-based reading",
+      "D. Scenario-based reading"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What aspect of requirements validation does 'correctness' primarily address?",
+    "options": [
+      "A. Ensuring no conflicts or duplications exist between requirements",
+      "B. Validating the clarity and unambiguity of each requirement",
+      "C. Determining if requirements are implementable within constraints",
+      "D. Ensuring requirements cover all necessary scenarios"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What is the purpose of the 'preparation' phase in the inspection process?",
+    "options": [
+      "A. Inspectors review the document individually to identify problems",
+      "B. Inspectors discuss issues identified during the inspection meeting",
+      "C. Inspectors finalize the requirements for implementation",
+      "D. Inspectors use checklists to guide the review process"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which characteristic of a requirement ensures it is relevant and necessary?",
+    "options": [
+      "A. Necessity",
+      "B. Clarity",
+      "C. Consistency",
+      "D. Testability"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "How does 'scenario-based reading' contribute to validating requirements?",
+    "options": [
+      "A. By ensuring requirements are covered through real-world scenarios",
+      "B. By focusing on specific types of defects",
+      "C. By reviewing the document using predefined checklists",
+      "D. By allowing reviewers to use personal knowledge"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What should be done if a requirement is found to conflict with another requirement?",
+    "options": [
+      "A. The conflicting requirement should be revised or clarified",
+      "B. The requirement should be ignored if it does not affect the system",
+      "C. The requirements should be documented as notes for future reference",
+      "D. The requirements should be finalized without changes"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which requirement validation technique involves reviewing the requirements for specific defect types?",
+    "options": [
+      "A. Defect-based reading",
+      "B. Scenario-based reading",
+      "C. Checklist-based reading",
+      "D. Ad-hoc reading"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "How does 'perspective-based reading' differ from 'ad-hoc reading'?",
+    "options": [
+      "A. Perspective-based reading reviews from different stakeholder viewpoints, while ad-hoc reading relies on personal knowledge",
+      "B. Perspective-based reading uses predefined checklists, while ad-hoc reading is unstructured",
+      "C. Perspective-based reading focuses on detecting specific defects, while ad-hoc reading does not",
+      "D. Perspective-based reading involves a formal review process, while ad-hoc reading does not"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What does the term 'testability' refer to in the context of requirements validation?",
+    "options": [
+      "A. The ability to verify requirements through testing procedures",
+      "B. The ability to review requirements for clarity and precision",
+      "C. The ability to ensure requirements are free from ambiguity",
+      "D. The ability to validate requirements against technical constraints"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "Which characteristic of requirements ensures they are free from unnecessary details?",
+    "options": [
+      "A. Clarity",
+      "B. Necessity",
+      "C. Consistency",
+      "D. Completeness"
+    ],
+    "answer": "B"
+  },
+  {"type": "mc",
+    "question": "Which technique focuses on identifying defects based on the viewpoint of the reviewer?",
+    "options": [
+      "A. Ad-hoc reading",
+      "B. Defect-based reading",
+      "C. Perspective-based reading",
+      "D. Scenario-based reading"
+    ],
+    "answer": "C"
+  },
+  {"type": "mc",
+    "question": "What does 'traceability' in requirements validation help to ensure?",
+    "options": [
+      "A. Each requirement can be traced back to specific needs or constraints",
+      "B. Requirements are tested and validated effectively",
+      "C. Requirements are free from duplication and conflicts",
+      "D. Requirements are clearly written and unambiguous"
+    ],
+    "answer": "A"
+  },
+  {"type": "mc",
+    "question": "What does 'consistency' in requirements validation primarily address?",
+    "options": [
+      "A. The absence of conflicts or contradictions between requirements",
+      "B. The clarity and precision of each requirement",
+      "C. The completeness and coverage of all scenarios",
+      "D. The technical feasibility of each requirement"
+    ],
+    "answer": "A"
+  },
+
+
+];
+
+
+
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedTFCount = 0;
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+            shuffleQuestions();
+        });
+
+        function updateRangeValues() {
+            const tfRange = document.getElementById('tfCount');
+            const mcRange = document.getElementById('mcCount');
+            tfRange.max = questions.filter(q => q.type === 'tf').length;
+            mcRange.max = questions.filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function startExam() {
+            selectedTFCount = parseInt(document.getElementById('tfCount').value);
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const tfQuestions = questions.filter(q => q.type === 'tf').slice(0, selectedTFCount);
+            const mcQuestions = questions.filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return [...tfQuestions, ...mcQuestions];
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'tf') {
+                questionElement.innerHTML += `
+                    <label style="display:block;"><input type="radio" name="answer" value="T"> F</label>
+                    <label style="display:block;"><input type="radio" name="answer" value="F"> F</label>
+                `;
+            } else if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = F;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                } else {
+                    correctAnswers.push({ question: question.question, correctAnswer: question.answer, userAnswer: userAnswers[index] });
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = `<div class="result">You scored ${score} out of ${selectedQuestions.length}</div>`;
+
+            if (score === selectedQuestions.length) {
+                resultContainer.innerHTML += '<div class="result">Congratulations! You got a perfect score!</div>';
+            } else {
+                correctAnswers.forEach(({ question, correctAnswer, userAnswer }) => {
+                    resultContainer.innerHTML += `
+                        <div class="result">
+                            <p>Question: ${question}</p>
+                            <p>Correct Answer: ${correctAnswer}</p>
+                            <p>Your Answer: ${userAnswer}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('homeContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+

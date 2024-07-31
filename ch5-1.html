@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch5</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter5 Exam</h1>
+            <label class="slider-label">Select number of T/F questions:</label>
+            <input type="range" id="tfCount" min="1" max="0" value="5" oninput="updateValue('tfCountValue', this.value)">
+            <span id="tfCountValue">1</span>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>[
+        { type: 'tf', question: 'Digital certificates are used to verify the identity of a sender or a Web site.', answer: 'T' },
+        { type: 'tf', question: 'The certificate authority (CA) is responsible for issuing digital certificates.', answer: 'T' },
+        { type: 'tf', question: 'ERP systems were initially adopted by small and medium-sized enterprises.', answer: 'F' },
+        { type: 'tf', question: 'Batch processing involves processing transactions immediately as they occur.', answer: 'F' },
+        { type: 'tf', question: 'Online transaction processing (OLTP) processes transactions in real-time.', answer: 'T' },
+        { type: 'tf', question: 'Enterprise Resource Planning (ERP) systems aim to integrate information across all business functions.', answer: 'T' },
+        { type: 'tf', question: 'Materials requirement planning (MRP) systems are the predecessors of ERP systems.', answer: 'T' },
+        { type: 'tf', question: 'Secure Sockets Layer (SSL) is used to secure sensitive data during electronic transactions.', answer: 'T' },
+        { type: 'tf', question: 'Electronic cash refers to a digital form of money used for e-commerce transactions.', answer: 'T' },
+        { type: 'tf', question: 'Smart cards do not have embedded microchips.', answer: 'F' },
+        { type: 'tf', question: 'P-Cards are used to streamline traditional purchase order and invoice payment processes.', answer: 'T' },
+        { type: 'tf', question: 'Mobile commerce relies on wired connections to place orders and conduct business.', answer: 'F' },
+        { type: 'tf', question: 'The .mobi domain was created to help attract mobile users to the web.', answer: 'T' },
+        { type: 'tf', question: 'E-Government aims to simplify the sharing of information and improve citizen-government relationships.', answer: 'T' },
+        { type: 'tf', question: 'Disintermediation refers to the addition of intermediate organizations between the producer and consumer.', answer: 'F' },
+        { type: 'tf', question: 'Consumer-to-Consumer (C2C) e-commerce involves organizations selling directly to consumers.', answer: 'F' },
+        { type: 'tf', question: 'ERP systems ensure that information can be shared across all levels of management.', answer: 'T' },
+        { type: 'tf', question: 'A general ledger is the main accounting record of a business.', answer: 'T' },
+        { type: 'tf', question: 'Managerial accounting uses only actual data to plan future operations.', answer: 'F' },
+        { type: 'tf', question: 'Customer Relationship Management (CRM) systems include features like sales management and customer support.', answer: 'T' },
+        
+        { type: 'mc', question: 'Which of the following is NOT an advantage of ERP systems?', options: ['a) Improved access to data', 'b) Elimination of legacy systems', 'c) Decreased complexity of IT infrastructure', 'd) Improvement of work processes'], answer: 'c) Decreased complexity of IT infrastructure' },
+        { type: 'mc', question: 'What is the role of a certificate authority (CA) in digital transactions?', options: ['a) Issuing electronic cash', 'b) Managing transaction records', 'c) Issuing digital certificates', 'd) Providing payment gateways'], answer: 'c) Issuing digital certificates' },
+        { type: 'mc', question: 'Which of the following best describes mobile commerce?', options: ['a) Conducting business using desktop computers', 'b) Use of mobile devices for business transactions', 'c) Reliance on paper-based processes', 'd) Selling products in physical stores'], answer: 'b) Use of mobile devices for business transactions' },
+        { type: 'mc', question: 'What is a primary feature of Customer Relationship Management (CRM) systems?', options: ['a) Raw material procurement', 'b) Sales management', 'c) Production planning', 'd) Financial reporting'], answer: 'b) Sales management' },
+        { type: 'mc', question: 'Which technology is used to secure sensitive data during electronic transactions?', options: ['a) HTTP', 'b) FTP', 'c) SSL', 'd) SMTP'], answer: 'c) SSL' },
+        { type: 'mc', question: 'What is a P-Card used for?', options: ['a) Storing electronic cash', 'b) Issuing digital certificates', 'c) Streamlining purchase orders', 'd) Managing customer relationships'], answer: 'c) Streamlining purchase orders' },
+        { type: 'mc', question: 'Which of the following is a predecessor to ERP systems?', options: ['a) CRM', 'b) MRP', 'c) SCM', 'd) PLM'], answer: 'b) MRP' },
+        { type: 'mc', question: 'Which form of e-commerce involves consumers selling directly to other consumers?', options: ['a) B2B', 'b) B2C', 'c) C2C', 'd) G2C'], answer: 'c) C2C' },
+        { type: 'mc', question: 'Which is NOT a feature of ERP systems?', options: ['a) Integrating business processes', 'b) Isolating data silos', 'c) Sharing operational data', 'd) Centralized information management'], answer: 'b) Isolating data silos' },
+        { type: 'mc', question: 'What does "m-commerce" stand for?', options: ['a) Mobile commerce', 'b) Modern commerce', 'c) Modular commerce', 'd) Managed commerce'], answer: 'a) Mobile commerce' },
+        { type: 'mc', question: 'Which system includes planning, executing, and controlling raw material sourcing?', options: ['a) ERP', 'b) SCM', 'c) CRM', 'd) PLM'], answer: 'b) SCM' },
+        { type: 'mc', question: 'Which accounting method uses both actual and forecasted data?', options: ['a) Financial accounting', 'b) Managerial accounting', 'c) General ledger', 'd) Transaction processing'], answer: 'b) Managerial accounting' },
+        { type: 'mc', question: 'Which of the following is a disadvantage of using legacy systems?', options: ['a) Improved access to data', 'b) Inflexibility', 'c) Modern technology infrastructure', 'd) Enhanced work processes'], answer: 'b) Inflexibility' },
+        { type: 'mc', question: 'Which system captures transactions and creates associated general ledger records?', options: ['a) SCM', 'b) CRM', 'c) ERP', 'd) PLM'], answer: 'c) ERP' },
+        { type: 'mc', question: 'What does "OLTP" stand for?', options: ['a) Online transaction processing', 'b) Offline transaction processing', 'c) Over-the-limit processing', 'd) On-demand transaction processing'], answer: 'a) Online transaction processing' },
+        { type: 'mc', question: 'Which of the following is a challenge to successful ERP implementation?', options: ['a) Improved decision making', 'b) Elimination of legacy systems', 'c) Varied business needs', 'd) Technology upgrade'], answer: 'c) Varied business needs' },
+        { type: 'mc', question: 'Which component is NOT part of the CRM system?', options: ['a) Contact management', 'b) Sales management', 'c) Product lifecycle management', 'd) Marketing automation'], answer: 'c) Product lifecycle management' },
+        { type: 'mc', question: 'What is the primary goal of disintermediation in e-commerce?', options: ['a) Adding intermediaries', 'b) Eliminating intermediaries', 'c) Increasing costs', 'd) Reducing sales'], answer: 'b) Eliminating intermediaries' },
+        { type: 'mc', question: 'Which system provides means for managing product development data?', options: ['a) CRM', 'b) PLM', 'c) SCM', 'd) ERP'], answer: 'b) PLM' }
+      ];
+
+
+
+
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedTFCount = 0;
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+            shuffleQuestions();
+        });
+
+        function updateRangeValues() {
+            const tfRange = document.getElementById('tfCount');
+            const mcRange = document.getElementById('mcCount');
+            tfRange.max = questions.filter(q => q.type === 'tf').length;
+            mcRange.max = questions.filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function startExam() {
+            selectedTFCount = parseInt(document.getElementById('tfCount').value);
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const tfQuestions = questions.filter(q => q.type === 'tf').slice(0, selectedTFCount);
+            const mcQuestions = questions.filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return [...tfQuestions, ...mcQuestions];
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'tf') {
+                questionElement.innerHTML += `
+                    <label style="display:block;"><input type="radio" name="answer" value="T"> T</label>
+                    <label style="display:block;"><input type="radio" name="answer" value="F"> F</label>
+                `;
+            } else if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = F;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                } else {
+                    correctAnswers.push({ question: question.question, correctAnswer: question.answer, userAnswer: userAnswers[index] });
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = `<div class="result">You scored ${score} out of ${selectedQuestions.length}</div>`;
+
+            if (score === selectedQuestions.length) {
+                resultContainer.innerHTML += '<div class="result">Congratulations! You got a perfect score!</div>';
+            } else {
+                correctAnswers.forEach(({ question, correctAnswer, userAnswer }) => {
+                    resultContainer.innerHTML += `
+                        <div class="result">
+                            <p>Question: ${question}</p>
+                            <p>Correct Answer: ${correctAnswer}</p>
+                            <p>Your Answer: ${userAnswer}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('homeContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+

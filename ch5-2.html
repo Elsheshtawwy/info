@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch5</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter5 Exam</h1>
+            <label class="slider-label">Select number of T/F questions:</label>
+            <input type="range" id="tfCount" min="1" max="0" value="5" oninput="updateValue('tfCountValue', this.value)">
+            <span id="tfCountValue">1</span>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+      const questions =[
+
+      { "type": "tf", "question": "Mobile commerce relies on the use of mobile, wireless devices to place orders and conduct business.", "answer": "T" },
+    { "type": "tf", "question": "A Certificate Authority (CA) is responsible for guaranteeing the identity of people or organizations granted digital certificates.", "answer": "T" },
+    { "type": "tf", "question": "Smart cards are credit card-sized devices with an embedded microchip to provide electronic memory and processing capability.", "answer": "T" },
+    { "type": "tf", "question": "Disintermediation refers to the addition of intermediate organizations between the producer and the consumer.", "answer": "F" },
+    { "type": "tf", "question": "E-commerce includes conducting business activities electronically over computer networks.", "answer": "T" },
+    { "type": "tf", "question": "E-Government aims to complicate the sharing of information and slow down formerly paper-based processes.", "answer": "F" },
+    { "type": "tf", "question": "The market for m-commerce in North America matured much later than in Western Europe and Japan.", "answer": "T" },
+    { "type": "tf", "question": "Secure Sockets Layer (SSL) is used to secure sensitive data in electronic payment systems.", "answer": "T" },
+    { "type": "tf", "question": "Electronic cash is an amount of money that is computerized, stored, and used as cash for e-commerce transactions.", "answer": "T" },
+    { "type": "tf", "question": "A P-Card is a type of credit card used to streamline traditional purchase order and invoice payment processes.", "answer": "T" },
+    { "type": "tf", "question": "An ERP system ensures information can be shared across all business functions and all levels of management.", "answer": "T" },
+    { "type": "tf", "question": "Customer Relationship Management (CRM) systems are not designed to manage customer support or sales management.", "answer": "F" },
+    { "type": "tf", "question": "Product Lifecycle Management (PLM) software helps manage data associated with product development and engineering design.", "answer": "T" },
+    { "type": "tf", "question": "The hosted software model for enterprise software is not suitable for small and medium-sized enterprises (SMEs).", "answer": "F" },
+    { "type": "tf", "question": "Electronic payment systems are a key component of the e-commerce infrastructure.", "answer": "T" },
+    { "type": "tf", "question": "Transaction processing systems (TPSs) capture and process detailed data necessary to update records about fundamental business operations.", "answer": "T" },
+    { "type": "tf", "question": "Batch processing systems accumulate data over time and prepare it for processing as a single unit.", "answer": "T" },
+    { "type": "tf", "question": "Disintermediation is the process of introducing intermediaries in the supply chain.", "answer": "F" },
+    { "type": "tf", "question": "Government-to-consumer (G2C) is a form of e-Government.", "answer": "T" },
+    { "type": "tf", "question": "Mobile commerce applications do not include banking and e-boutiques.", "answer": "F" },
+    { "type": "tf", "question": "Digital certificates verify the identity of a sender or website.", "answer": "T" },
+    { "type": "mc", "question": "Which of the following describes the primary function of a Certificate Authority (CA)?", "options": ["a) To provide electronic memory and processing capability", "b) To streamline the traditional purchase order and invoice payment processes", "c) To issue digital certificates that verify the identity of a sender or website", "d) To secure sensitive data using Secure Sockets Layer (SSL)"], "answer": "c) To issue digital certificates that verify the identity of a sender or website" },
+    { "type": "mc", "question": "Mobile commerce (m-commerce) relies on which of the following?", "options": ["a) Desktop computers", "b) Mobile, wireless devices", "c) Landline telephones", "d) Fax machines"], "answer": "b) Mobile, wireless devices" },
+    { "type": "mc", "question": "Disintermediation in e-commerce refers to:", "options": ["a) Adding more intermediaries between the producer and the consumer", "b) Eliminating intermediate organizations between the producer and the consumer", "c) Increasing the number of transactions", "d) Decreasing the use of digital certificates"], "answer": "b) Eliminating intermediate organizations between the producer and the consumer" },
+    { "type": "mc", "question": "Which of the following is not a component of electronic payment systems?", "options": ["a) Digital certificates", "b) Secure Sockets Layer (SSL)", "c) Smart cards", "d) Landline telephones"], "answer": "d) Landline telephones" },
+    { "type": "mc", "question": "The market for m-commerce in North America matured much later than in which regions?", "options": ["a) Africa and South America", "b) Western Europe and Japan", "c) Australia and New Zealand", "d) Eastern Europe and China"], "answer": "b) Western Europe and Japan" },
+    { "type": "mc", "question": "Smart cards are characterized by:", "options": ["a) Being credit card-sized devices with an embedded microchip", "b) Having a magnetic stripe for data storage", "c) Being used only for loyalty programs", "d) Having no electronic memory"], "answer": "a) Being credit card-sized devices with an embedded microchip" },
+    { "type": "mc", "question": "Which organization created the .mobi domain to attract mobile users to the Web?", "options": ["a) IEEE", "b) W3C", "c) ICANN", "d) IETF"], "answer": "c) ICANN" },
+    { "type": "mc", "question": "Which of the following payment methods is used to streamline traditional purchase order and invoice payment processes?", "options": ["a) P-Card", "b) E-Check", "c) Cryptocurrency", "d) Mobile payment apps"], "answer": "a) P-Card" },
+    { "type": "mc", "question": "E-Government aims to:", "options": ["a) Complicate the sharing of information", "b) Slow down formerly paper-based processes", "c) Simplify the sharing of information and speed up processes", "d) Increase the use of traditional mailing systems"], "answer": "c) Simplify the sharing of information and speed up processes" },
+    { "type": "mc", "question": "Electronic cash can be best described as:", "options": ["a) A physical currency", "b) A method for processing physical checks", "c) A computerized amount of money used for e-commerce transactions", "d) A traditional credit card"], "answer": "c) A computerized amount of money used for e-commerce transactions" },
+    { "type": "mc", "question": "ERP systems ensure information can be shared across:", "options": ["a) Only the finance department", "b) All business functions and levels of management", "c) Only the IT department", "d) Only the sales department"], "answer": "b) All business functions and levels of management" },
+    { "type": "mc", "question": "Customer Relationship Management (CRM) systems are designed to:", "options": ["a) Manage customer support and sales management", "b) Only handle internal communications", "c) Only track inventory", "d) Only process financial transactions"], "answer": "a) Manage customer support and sales management" },
+    { "type": "mc", "question": "Product Lifecycle Management (PLM) software helps manage:", "options": ["a) Customer relationships", "b) Financial transactions", "c) Data associated with product development and engineering design", "d) Employee attendance"], "answer": "c) Data associated with product development and engineering design" },
+    { "type": "mc", "question": "The hosted software model for enterprise software is particularly suitable for:", "options": ["a) Large multinational corporations", "b) Small and medium-sized enterprises (SMEs)", "c) Government agencies", "d) Educational institutions"], "answer": "b) Small and medium-sized enterprises (SMEs)" },
+    { "type": "mc", "question": "Transaction processing systems (TPSs) are used to:", "options": ["a) Manage employee performance", "b) Capture and process detailed data necessary to update records about fundamental business operations", "c) Design new products", "d) Develop marketing strategies"], "answer": "b) Capture and process detailed data necessary to update records about fundamental business operations" },
+    { "type": "mc", "question": "Batch processing systems operate by:", "options": ["a) Processing transactions immediately as they occur", "b) Accumulating data over time and preparing it for processing as a single unit", "c) Handling real-time data", "d) Managing financial reports"], "answer": "b) Accumulating data over time and preparing it for processing as a single unit" },
+    { "type": "mc", "question": "Which of the following is a form of e-Government?", "options": ["a) Business-to-business (B2B)", "b) Consumer-to-consumer (C2C)", "c) Government-to-consumer (G2C)", "d) Consumer-to-business (C2B)"], "answer": "c) Government-to-consumer (G2C)" },
+    { "type": "mc", "question": "Digital certificates are primarily used to:", "options": ["a) Process payments", "b) Verify the identity of a sender or website", "c) Track inventory", "d) Manage customer relations"], "answer": "b) Verify the identity of a sender or website" },
+    { "type": "mc", "question": "Which of the following describes a P-Card?", "options": ["a) A type of physical currency", "b) A credit card used to streamline purchase order and invoice payment processes", "c) A debit card for personal expenses", "d) A mobile payment application"], "answer": "b) A credit card used to streamline purchase order and invoice payment processes" },
+    { "type": "mc", "question": "Online transaction processing (OLTP) systems:", "options": ["a) Process each transaction immediately", "b) Batch process transactions", "c) Are used only for large-scale data analysis", "d) Only manage offline transactions"], "answer": "a) Process each transaction immediately" },
+    { "type": "mc", "question": "Enterprise Resource Planning (ERP) systems were initially implemented by:", "options": ["a) Small businesses", "b) Large organizations", "c) Non-profit organizations", "d) Individual entrepreneurs"], "answer": "b) Large organizations" },
+    { "type": "mc", "question": "ERP systems evolved from:", "options": ["a) Customer Relationship Management (CRM) systems", "b) Materials Requirement Planning (MRP) systems", "c) Product Lifecycle Management (PLM) systems", "d) Financial accounting systems"], "answer": "b) Materials Requirement Planning (MRP) systems" },
+    { "type": "mc", "question": "Financial accounting must comply with regulations from:", "options": ["a) Local governments only", "b) Only the SEC", "c) SEC, IRS, and FASB", "d) Only internal company policies"], "answer": "c) SEC, IRS, and FASB" },
+    { "type": "mc", "question": "Managerial accounting uses which types of data?", "options": ["a) Only actual data", "b) Only forecasted data", "c) Both actual and forecasted data", "d) Only historical data"], "answer": "c) Both actual and forecasted data" },
+    { "type": "mc", "question": "Customer Relationship Management (CRM) systems provide:", "options": ["a) Inventory management", "b) Marketing automation", "c) Financial reporting", "d) Employee attendance tracking"], "answer": "b) Marketing automation" },
+    { "type": "mc", "question": "PLM software includes data needed for:", "options": ["a) FDA and environmental compliance", "b) Customer relationship management", "c) Financial accounting", "d) Employee performance reviews"], "answer": "a) FDA and environmental compliance" },
+    { "type": "mc", "question": "Hosted software models eliminate the need for:", "options": ["a) Any IT personnel", "b) A full-time IT person to maintain key business applications in small firms", "c) Financial audits", "d) Marketing strategies"], "answer": "b) A full-time IT person to maintain key business applications in small firms" },
+    { "type": "mc", "question": "Digital certificates are used for:", "options": ["a) Securing emails", "b) Only securing emails", "c) Securing various types of electronic communications and transactions", "d) Physical security"], "answer": "c) Securing various types of electronic communications and transactions" },
+    { "type": "mc", "question": "Which of the following describes the role of Secure Sockets Layer (SSL) in e-commerce?", "options": ["a) Processing payments", "b) Securing sensitive data", "c) Managing inventory", "d) Marketing automation"], "answer": "b) Securing sensitive data" },
+    { "type": "mc", "question": "Batch processing systems are characterized by:", "options": ["a) Immediate transaction processing", "b) Processing transactions as a single unit after accumulating data", "c) Handling real-time data", "d) Managing marketing campaigns"], "answer": "b) Processing transactions as a single unit after accumulating data" },
+    { "type": "mc", "question": "ERP systems are designed to ensure:", "options": ["a) Data isolation within different business functions", "b) Data sharing across all business functions and levels of management", "c) Only financial data management", "d) Only inventory management"], "answer": "b) Data sharing across all business functions and levels of management" },
+    { "type": "mc", "question": "CRM systems assist in:", "options": ["a) Building a database about customers", "b) Managing only inventory", "c) Processing financial transactions", "d) Developing new products"], "answer": "a) Building a database about customers" },
+    { "type": "mc", "question": "The .mobi domain was created to:", "options": ["a) Help attract mobile users to the Web", "b) Secure online transactions", "c) Manage customer relationships", "d) Track employee attendance"], "answer": "a) Help attract mobile users to the Web" },
+    { "type": "mc", "question": "PLM software is used for managing data associated with:", "options": ["a) Product disposal", "b) Customer relationships", "c) Financial transactions", "d) Employee performance"], "answer": "a) Product disposal" }
+
+];
+
+
+
+
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedTFCount = 0;
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+            shuffleQuestions();
+        });
+
+        function updateRangeValues() {
+            const tfRange = document.getElementById('tfCount');
+            const mcRange = document.getElementById('mcCount');
+            tfRange.max = questions.filter(q => q.type === 'tf').length;
+            mcRange.max = questions.filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function startExam() {
+            selectedTFCount = parseInt(document.getElementById('tfCount').value);
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const tfQuestions = questions.filter(q => q.type === 'tf').slice(0, selectedTFCount);
+            const mcQuestions = questions.filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return [...tfQuestions, ...mcQuestions];
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'tf') {
+                questionElement.innerHTML += `
+                    <label style="display:block;"><input type="radio" name="answer" value="T"> T</label>
+                    <label style="display:block;"><input type="radio" name="answer" value="F"> F</label>
+                `;
+            } else if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = F;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                } else {
+                    correctAnswers.push({ question: question.question, correctAnswer: question.answer, userAnswer: userAnswers[index] });
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = `<div class="result">You scored ${score} out of ${selectedQuestions.length}</div>`;
+
+            if (score === selectedQuestions.length) {
+                resultContainer.innerHTML += '<div class="result">Congratulations! You got a perfect score!</div>';
+            } else {
+                correctAnswers.forEach(({ question, correctAnswer, userAnswer }) => {
+                    resultContainer.innerHTML += `
+                        <div class="result">
+                            <p>Question: ${question}</p>
+                            <p>Correct Answer: ${correctAnswer}</p>
+                            <p>Your Answer: ${userAnswer}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('homeContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+

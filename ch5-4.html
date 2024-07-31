@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch5</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter5 Exam</h1>
+            <label class="slider-label">Select number of T/F questions:</label>
+            <input type="range" id="tfCount" min="1" max="0" value="5" oninput="updateValue('tfCountValue', this.value)">
+            <span id="tfCountValue">1</span>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+      const questions = [
+      { type: 'mc', question: 'Which type of e-commerce involves all participants being organizations?', options: ['a) B2C', 'b) C2C', 'c) B2B', 'd) G2C'], answer: 'c) B2B' },
+  { type: 'mc', question: 'What is a digital certificate used for in e-commerce?', options: ['a) Securing data transfers', 'b) Verifying the identity of a sender or website', 'c) Processing online payments', 'd) Managing customer relationships'], answer: 'b) Verifying the identity of a sender or website' },
+  { type: 'mc', question: 'Which of the following is NOT a key feature of Customer Relationship Management (CRM) systems?', options: ['a) Contact management', 'b) Sales management', 'c) Marketing automation', 'd) Supply chain management'], answer: 'd) Supply chain management' },
+  { type: 'mc', question: 'Which system captures and processes detailed data necessary to update records about fundamental business operations?', options: ['a) CRM', 'b) ERP', 'c) TPS', 'd) PLM'], answer: 'c) TPS' },
+  { type: 'mc', question: 'ERP systems evolved from which type of systems?', options: ['a) Customer Relationship Management systems', 'b) Supply Chain Management systems', 'c) Materials Requirement Planning systems', 'd) Product Lifecycle Management systems'], answer: 'c) Materials Requirement Planning systems' },
+  { type: 'mc', question: 'What type of processing involves accumulating data over a period of time for processing as a single unit?', options: ['a) Online transaction processing', 'b) Real-time processing', 'c) Batch processing', 'd) Immediate processing'], answer: 'c) Batch processing' },
+  { type: 'mc', question: 'Which is NOT an advantage of ERP systems?', options: ['a) Improved access to data', 'b) Elimination of legacy systems', 'c) Increased operational costs', 'd) Improved work processes'], answer: 'c) Increased operational costs' },
+  { type: 'mc', question: 'Which system manages all data associated with product development, engineering design, production, support, and disposal?', options: ['a) CRM', 'b) SCM', 'c) PLM', 'd) ERP'], answer: 'c) PLM' },
+  { type: 'mc', question: 'What is the primary goal of Supply Chain Management (SCM) systems?', options: ['a) Enhancing customer relationships', 'b) Managing the production and delivery of products', 'c) Improving financial accounting', 'd) Automating marketing efforts'], answer: 'b) Managing the production and delivery of products' },
+  { type: 'mc', question: 'Which type of e-commerce involves the use of mobile, wireless devices to conduct business?', options: ['a) B2C', 'b) C2C', 'c) M-commerce', 'd) G2C'], answer: 'c) M-commerce' },
+  { type: 'tf', question: 'Digital certificates are used to verify the identity of a sender or website.', answer: 'T' },
+  { type: 'tf', question: 'Enterprise Resource Planning (ERP) systems evolved from Customer Relationship Management (CRM) systems.', answer: 'F' },
+  { type: 'tf', question: 'Transaction processing systems (TPS) are central to managing detailed data necessary for fundamental business operations.', answer: 'T' },
+  { type: 'tf', question: 'Online transaction processing (OLTP) involves accumulating data over time and processing it as a single unit.', answer: 'F' },
+  { type: 'tf', question: 'Batch processing systems process each transaction immediately.', answer: 'F' },
+  { type: 'tf', question: 'Supply Chain Management (SCM) systems manage activities from raw material sourcing to delivering finished products.', answer: 'T' },
+  { type: 'tf', question: 'Product Lifecycle Management (PLM) software does not include managing design and process documents.', answer: 'F' },
+  { type: 'tf', question: 'Customer Relationship Management (CRM) systems focus solely on managing financial transactions.', answer: 'F' },
+  { type: 'tf', question: 'ERP systems help eliminate costly and inflexible legacy systems.', answer: 'T' },
+  { type: 'tf', question: 'M-commerce relies on the use of mobile, wireless devices to place orders and conduct business.', answer: 'T' },
+  { type: 'tf', question: 'ERP systems evolved from materials requirement planning (MRP) systems.', answer: 'T' },
+  { type: 'tf', question: 'CRM systems include marketing automation.', answer: 'T' },
+  { type: 'tf', question: 'Transaction processing systems (TPSs) are used for order entry and inventory control.', answer: 'T' },
+  { type: 'tf', question: 'Digital certificates verify the identity of a sender or Web site.', answer: 'T' },
+  { type: 'tf', question: 'Secure Sockets Layer (SSL) is used to secure sensitive data.', answer: 'T' },
+  { type: 'tf', question: 'Product Lifecycle Management (PLM) software does not manage data associated with product development.', answer: 'F' },
+  { type: 'tf', question: 'Online transaction processing (OLTP) systems process transactions immediately.', answer: 'T' },
+  { type: 'tf', question: 'Enterprise Resource Planning (ERP) systems do not improve access to data for operational decision making.', answer: 'F' },
+  { type: 'tf', question: 'CRM systems provide analysis and social networking features.', answer: 'T' },
+  { type: 'tf', question: 'Batch processing involves processing transactions immediately.', answer: 'F' },
+  { type: 'tf', question: 'Hosted software models are commonly used by small and medium-sized enterprises (SMEs).', answer: 'T' },
+  { type: 'tf', question: 'A PLM system only manages data for the production stage.', answer: 'F' },
+  { type: 'tf', question: 'TPSs provide employees with data to help them achieve their goals.', answer: 'T' },
+  { type: 'tf', question: 'ERP systems are not central to the organization.', answer: 'F' },
+  { type: 'tf', question: 'A Certificate Authority (CA) is responsible for issuing digital certificates.', answer: 'T' },
+  { type: 'tf', question: 'M-commerce will succeed only if it provides services that meet customers’ needs.', answer: 'T' },
+  { type: 'tf', question: 'The general ledger is not the main accounting record of a business.', answer: 'F' },
+  { type: 'tf', question: 'CRM systems do not support customer support features.', answer: 'F' },
+  { type: 'tf', question: 'An enterprise system ensures information can be shared across all business functions.', answer: 'T' },
+  { type: 'tf', question: 'ERP systems help eliminate costly, inflexible legacy systems.', answer: 'T' },
+  { type: 'tf', question: 'SSL is not used in electronic payment systems.', answer: 'F' },
+  { type: 'tf', question: 'Digital certificates can be attached to email messages.', answer: 'T' },
+  { type: 'tf', question: 'ERP systems create associated general ledger records to track financial impacts of transactions.', answer: 'T' },
+  { type: 'tf', question: 'CRM systems do not provide access by smartphones.', answer: 'F' },
+  { type: 'tf', question: 'Batch processing prepares data for processing as a single unit.', answer: 'T' },
+  { type: 'tf', question: 'PLM software includes data needed for FDA compliance.', answer: 'T' },
+  { type: 'tf', question: 'ERP systems do not employ a database of key operational and planning data.', answer: 'F' },
+  { type: 'tf', question: 'CRM systems include sales management features.', answer: 'T' },
+  { type: 'tf', question: 'Online transaction processing (OLTP) accumulates transactions over time.', answer: 'F' },
+  { type: 'tf', question: 'Enterprise Resource Planning (ERP) software supports the efficient operation of business processes.', answer: 'T' },
+  { type: 'mc', question: 'Which technique involves users working alongside evaluators to criticize a system?', options: ['a) Protocol analysis', 'b) Heuristic evaluation', 'c) Cooperative evaluation', 'd) Cognitive walkthrough'], answer: 'c) Cooperative evaluation' },
+  { type: 'mc', question: 'What does CRM stand for?', options: ['a) Customer Relationship Management', 'b) Customer Resource Management', 'c) Client Relationship Management', 'd) Client Resource Management'], answer: 'a) Customer Relationship Management' },
+  { type: 'mc', question: 'What is the main purpose of a digital certificate?', options: ['a) To encrypt data', 'b) To verify the identity of a sender or website', 'c) To store sensitive information', 'd) To manage network connections'], answer: 'b) To verify the identity of a sender or website' },
+  { type: 'mc', question: 'Which of the following is a key feature of ERP systems?', options: ['a) Marketing automation', 'b) Inventory control', 'c) Customer support', 'd) Social networking'], answer: 'b) Inventory control' },
+  { type: 'mc', question: 'What is SSL used for?', options: ['a) Storing passwords', 'b) Encrypting emails', 'c) Securing sensitive data', 'd) Managing user access'], answer: 'c) Securing sensitive data' },
+  { type: 'mc', question: 'Which system captures and processes detailed data necessary to update records about fundamental business operations?', options: ['a) CRM', 'b) ERP', 'c) PLM', 'd) TPS'], answer: 'd) TPS' },
+  { type: 'mc', question: 'What does PLM software manage?', options: ['a) Sales data', 'b) Product development data', 'c) Customer interactions', 'd) Financial transactions'], answer: 'b) Product development data' },
+  { type: 'mc', question: 'Which processing method involves processing transactions immediately?', options: ['a) Batch processing', 'b) Online transaction processing', 'c) Real-time processing', 'd) Delayed processing'], answer: 'b) Online transaction processing' },
+  { type: 'mc', question: 'Which of the following is not a feature of CRM systems?', options: ['a) Contact management', 'b) Sales management', 'c) Marketing automation', 'd) Inventory control'], answer: 'd) Inventory control' },
+  { type: 'mc', question: 'What is the role of a Certificate Authority (CA)?', options: ['a) Encrypt data', 'b) Issue digital certificates', 'c) Manage databases', 'd) Control network access'], answer: 'b) Issue digital certificates' },
+  { type: 'mc', question: 'What type of system ensures information can be shared across all business functions?', options: ['a) CRM', 'b) ERP', 'c) TPS', 'd) PLM'], answer: 'b) ERP' },
+  { type: 'mc', question: 'Which processing method accumulates transactions over time?', options: ['a) Batch processing', 'b) Online transaction processing', 'c) Real-time processing', 'd) Instant processing'], answer: 'a) Batch processing' },
+  { type: 'mc', question: 'Which of the following includes data needed for FDA compliance?', options: ['a) CRM', 'b) ERP', 'c) PLM', 'd) TPS'], answer: 'c) PLM' },
+  { type: 'mc', question: 'Which of the following systems provides analysis and social networking features?', options: ['a) CRM', 'b) ERP', 'c) TPS', 'd) PLM'], answer: 'a) CRM' },
+  { type: 'mc', question: 'Which technique evaluates a system based on expert guidelines?', options: ['a) Protocol analysis', 'b) Heuristic evaluation', 'c) Cooperative evaluation', 'd) Cognitive walkthrough'], answer: 'b) Heuristic evaluation' },
+  { type: 'mc', question: 'Which of the following is used to secure sensitive data in e-commerce?', options: ['a) Digital cash', 'b) SSL', 'c) P-Card', 'd) Smart card'], answer: 'b) SSL' },
+  { type: 'mc', question: 'Which system involves managing all data associated with product development and design?', options: ['a) CRM', 'b) ERP', 'c) PLM', 'd) TPS'], answer: 'c) PLM' },
+  { type: 'mc', question: 'What is the main record of a business in financial and managerial accounting?', options: ['a) Sales ledger', 'b) Inventory ledger', 'c) General ledger', 'd) Expense ledger'], answer: 'c) General ledger' },
+  { type: 'mc', question: 'Which software model is commonly used by small and medium-sized enterprises (SMEs)?', options: ['a) Hosted software model', 'b) Open-source software model', 'c) Custom software model', 'd) Proprietary software model'], answer: 'a) Hosted software model' },
+  { type: 'mc', question: 'Which system supports the efficient operation of business processes?', options: ['a) CRM', 'b) ERP', 'c) TPS', 'd) PLM'], answer: 'b) ERP' },
+];
+
+
+
+
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedTFCount = 0;
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+            shuffleQuestions();
+        });
+
+        function updateRangeValues() {
+            const tfRange = document.getElementById('tfCount');
+            const mcRange = document.getElementById('mcCount');
+            tfRange.max = questions.filter(q => q.type === 'tf').length;
+            mcRange.max = questions.filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function startExam() {
+            selectedTFCount = parseInt(document.getElementById('tfCount').value);
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const tfQuestions = questions.filter(q => q.type === 'tf').slice(0, selectedTFCount);
+            const mcQuestions = questions.filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return [...tfQuestions, ...mcQuestions];
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'tf') {
+                questionElement.innerHTML += `
+                    <label style="display:block;"><input type="radio" name="answer" value="T"> T</label>
+                    <label style="display:block;"><input type="radio" name="answer" value="F"> F</label>
+                `;
+            } else if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = F;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                } else {
+                    correctAnswers.push({ question: question.question, correctAnswer: question.answer, userAnswer: userAnswers[index] });
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = `<div class="result">You scored ${score} out of ${selectedQuestions.length}</div>`;
+
+            if (score === selectedQuestions.length) {
+                resultContainer.innerHTML += '<div class="result">Congratulations! You got a perfect score!</div>';
+            } else {
+                correctAnswers.forEach(({ question, correctAnswer, userAnswer }) => {
+                    resultContainer.innerHTML += `
+                        <div class="result">
+                            <p>Question: ${question}</p>
+                            <p>Correct Answer: ${correctAnswer}</p>
+                            <p>Your Answer: ${userAnswer}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('homeContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+

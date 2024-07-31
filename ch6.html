@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch6</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter6 Exam</h1>
+            <label class="slider-label">Select number of T/F questions:</label>
+            <input type="range" id="tfCount" min="1" max="0" value="5" oninput="updateValue('tfCountValue', this.value)">
+            <span id="tfCountValue">1</span>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+      const questions = [
+      { "type": "tf", "question": "The SRS document contains functional requirements, nonfunctional requirements, and constraints on the system.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements describe a set of high-level requirements that include detailed design constraints.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements cover system characteristics that cannot be expressed as functions, such as maintainability and usability.", "answer": "F" },
+  { "type": "tf", "question": "Constraints in the SRS document specify what the system should or should not do, such as compliance with standards and performance limits.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should include details about hardware and operating systems used for the system.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements are concerned with the internal workings of the system, such as design and implementation details.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements include reliability issues, performance issues, and security.", "answer": "F" },
+  { "type": "tf", "question": "An example of a nonfunctional requirement is the system's ability to interact with other external systems.", "answer": "F" },
+  { "type": "tf", "question": "An SRS document should be unstructured to allow for flexibility in its interpretation.", "answer": "F" },
+  { "type": "tf", "question": "Examples of bad SRS documents include those that are unstructured or contain contradictions.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements describe what the system should do in terms of input and output data.", "answer": "F" },
+  { "type": "tf", "question": "Constraints on the system can include how fast the system can produce results and how it interacts with other systems.", "answer": "F" },
+  { "type": "tf", "question": "A functional requirement may include detailed descriptions of how the system processes data.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements are concerned with system performance, such as response time and resource usage.", "answer": "F" },
+  { "type": "tf", "question": "Constraints in an SRS document should specify the hardware and operating systems to be used.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be structured to ensure clarity and prevent ambiguities.", "answer": "F" },
+  { "type": "tf", "question": "Overspecification in an SRS document can restrict the designer's solution space.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements often describe user interface elements and design constraints.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should include examples of how the system processes input and produces output.", "answer": "F" },
+  { "type": "tf", "question": "Constraints on system performance are part of the nonfunctional requirements in the SRS document.", "answer": "F" },
+  { "type": "tf", "question": "Good SRS documents should avoid contradictions and ensure that all requirements are clearly defined.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements do not include usability and maintainability aspects of the system.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements describe specific actions that the system must perform.", "answer": "F" },
+  { "type": "tf", "question": "An SRS document should include details about constraints like hardware specifications and software interfaces.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements should include details about how the system interacts with external systems.", "answer": "F" },
+  { "type": "tf", "question": "Constraints in the SRS document may include performance limits and compliance with standards.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements are often related to the quality attributes of the system.", "answer": "F" },
+  { "type": "tf", "question": "An example of a constraint is specifying how fast the system can process requests.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be detailed and include all design constraints to ensure completeness.", "answer": "F" },
+  { "type": "tf", "question": "An unstructured SRS document can lead to difficulties in maintaining and updating requirements.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should clearly specify both functional and nonfunctional requirements to provide a comprehensive overview.", "answer": "F" },
+  { "type": "tf", "question": "A well-organized SRS document helps prevent contradictions and scope for misunderstandings.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements should specify how the system will handle user inputs and produce outputs.", "answer": "F" },
+  { "type": "tf", "question": "Constraints in the SRS document should address aspects like operating system and hardware specifications.", "answer": "F" },
+  { "type": "tf", "question": "Overspecification in the SRS document can provide too much detail about how the system should function.", "answer": "F" },
+  { "type": "tf", "question": "An SRS document should avoid being too rigid or detailed to allow flexibility in design.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements include characteristics such as reliability, performance, and usability.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements are concerned with the system's operational aspects and its interactions with users.", "answer": "F" },
+  { "type": "tf", "question": "Constraints on system performance include specifying how fast the system can produce results.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should provide examples of how to handle various types of input and output data.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should include detailed design constraints and how the system should be implemented.", "answer": "F" },
+  { "type": "tf", "question": "Examples of bad SRS documents include those with contradictions or that are unstructured.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements are concerned with system functionality rather than performance or usability.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements describe what the system should do and how it should interact with users.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should avoid including details about hardware and software constraints.", "answer": "F" },
+  { "type": "tf", "question": "An SRS document should be carefully structured to ensure clarity and prevent ambiguities.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should provide clear and unambiguous descriptions of all requirements.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements include descriptions of the system's performance characteristics and usability.", "answer": "F" },
+  { "type": "tf", "question": "Constraints on the system may include how it should comply with standards and interact with other systems.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should specify how the system should process user inputs and produce outputs.", "answer": "F" },
+  { "type": "tf", "question": "Overspecification in the SRS document can limit the designer's flexibility in finding solutions.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements are not concerned with the system's usability or maintainability.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should include detailed functional and nonfunctional requirements as well as constraints.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be flexible to accommodate changes in system design and requirements.", "answer": "F" },
+  { "type": "tf", "question": "Constraints in an SRS document may involve performance limits and standards compliance.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be comprehensive and avoid contradictions to ensure effective communication.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements are concerned with what the system should do in terms of user interactions and outputs.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should include all design details to provide a complete picture of the system.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements include aspects like reliability, performance, and interface with other systems.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should avoid including specific hardware or software constraints to allow flexibility.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements are primarily concerned with the operational aspects and data processing of the system.", "answer": "F" },
+  { "type": "tf", "question": "Constraints such as compliance with standards and performance limits are part of the nonfunctional requirements.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should provide clear and concise descriptions of functional and nonfunctional requirements.", "answer": "F" },
+  { "type": "tf", "question": "Overspecification in an SRS document can be beneficial by providing detailed implementation instructions.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements are not concerned with the system's performance or usability aspects.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be structured to include examples of input and output processing.", "answer": "F" },
+  { "type": "tf", "question": "Constraints on the system can include performance limits and compliance with relevant standards.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should include detailed design constraints to ensure completeness.", "answer": "F" },
+  { "type": "tf", "question": "An SRS document should clearly specify functional and nonfunctional requirements without being unstructured.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements describe how the system should process input data and produce output data.", "answer": "F" },
+  { "type": "tf", "question": "Constraints in the SRS document should specify the system's performance limits and compliance with standards.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements are concerned with system aspects such as maintainability, usability, and performance.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should avoid including examples of input and output processing to maintain flexibility.", "answer": "F" },
+  { "type": "tf", "question": "Overspecification in an SRS document can limit the designer's flexibility and creativity.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be detailed and include extensive design constraints to ensure completeness.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements are not concerned with how the system processes data but with what the system should do.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be structured to clearly define functional and nonfunctional requirements, as well as constraints.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements include aspects like system reliability, performance, and security.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should avoid including details about constraints like hardware specifications and performance limits.", "answer": "F" },
+  { "type": "tf", "question": "An SRS document should be carefully written to avoid ambiguities and ensure that all requirements are clearly defined.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should include examples of bad practices such as unstructured specifications and contradictions.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements are concerned with describing the system's operational aspects and interactions with users.", "answer": "F" },
+  { "type": "tf", "question": "Constraints such as compliance with standards and performance limits are part of the functional requirements.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be structured to provide clear descriptions of functional, nonfunctional, and constraint requirements.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements are primarily concerned with the system's functionality rather than performance or usability.", "answer": "F" },
+  { "type": "tf", "question": "Overspecification in an SRS document can limit the flexibility of the design and restrict the solution space.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should include detailed design constraints to ensure that all system requirements are met.", "answer": "F" },
+  { "type": "tf", "question": "An SRS document should include clear examples of input and output processing to aid in understanding the requirements.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements are concerned with what the system should do and how it should interact with users.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should avoid including details about hardware and software constraints to maintain flexibility.", "answer": "F" },
+  { "type": "tf", "question": "Constraints on the system may include performance limits and standards compliance.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements include characteristics like reliability, usability, and interface with external systems.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be comprehensive and include extensive details on design constraints to ensure all requirements are met.", "answer": "F" },
+  { "type": "tf", "question": "An SRS document should be well-organized and clearly define all functional and nonfunctional requirements, as well as constraints.", "answer": "F" },
+  { "type": "tf", "question": "Overspecification can restrict the flexibility of the design process and limit the designer's options.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should provide clear and unambiguous descriptions of all system requirements, including constraints.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements focus on how the system should process data and provide outputs.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should include extensive design constraints to ensure a complete and thorough specification.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements include aspects such as performance, reliability, and usability.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should avoid including examples of input and output processing to maintain flexibility.", "answer": "F" },
+  { "type": "tf", "question": "Constraints on the system may include performance limits and standards compliance.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements describe the system's operational aspects and interactions with users.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be structured to include examples of how to handle various types of input and output data.", "answer": "F" },
+  { "type": "tf", "question": "Overspecification in the SRS document can limit the flexibility of the design and restrict the solution space.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be comprehensive and include all design constraints to ensure completeness.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements are concerned with system attributes such as usability and maintainability.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should avoid including detailed hardware and software constraints to allow flexibility.", "answer": "F" },
+  { "type": "tf", "question": "Functional requirements include descriptions of what the system should do and how it should interact with users.", "answer": "F" },
+  { "type": "tf", "question": "Constraints in the SRS document can include performance limits and compliance with standards.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be detailed and include all design constraints to ensure that all requirements are met.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should clearly define functional and nonfunctional requirements, as well as constraints.", "answer": "F" },
+  { "type": "tf", "question": "Nonfunctional requirements are not concerned with the system's performance or usability aspects.", "answer": "F" },
+  { "type": "tf", "question": "The SRS document should be well-organized to include clear examples of input and output processing.", "answer": "F" },
+  { "type": "tf", "question": "Overspecification in an SRS document can be beneficial by providing detailed instructions for implementation.", "answer": "F" },
+
+      
+{ "type": "mc", "question": "What are the three main parts of an SRS document?", "options": ["A) Functional requirements, design constraints, and user interface", "B) Functional requirements, nonfunctional requirements, and constraints", "C) Nonfunctional requirements, design constraints, and hardware specifications", "D) System architecture, functional requirements, and performance metrics"], "answer": "B) Functional requirements, nonfunctional requirements, and constraints" },
+
+{ "type": "mc", "question": "What does a functional requirement describe?", "options": ["A) System performance and usability", "B) Transformation of input data to output data", "C) Hardware and software constraints", "D) System maintainability and portability"], "answer": "B) Transformation of input data to output data" },
+
+{ "type": "mc", "question": "Which of the following is an example of a functional requirement?", "options": ["A) Maintainability of the system", "B) Compliance with coding standards", "C) Search for a book by author's name", "D) Response time for the system"], "answer": "C) Search for a book by author's name" },
+
+{ "type": "mc", "question": "What type of requirement includes aspects such as reliability and usability?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Design constraints", "D) Performance metrics"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "Which of the following is considered a nonfunctional requirement?", "options": ["A) User input validation", "B) System's ability to interact with external systems", "C) Search functionality", "D) Output of search results"], "answer": "B) System's ability to interact with external systems" },
+
+{ "type": "mc", "question": "What is an example of a constraint described in an SRS document?", "options": ["A) System should be able to handle 1000 simultaneous users", "B) System must comply with industry standards", "C) System should support multiple languages", "D) System should have a responsive user interface"], "answer": "B) System must comply with industry standards" },
+
+{ "type": "mc", "question": "Which part of the SRS document includes details about how the system should interact with users?", "options": ["A) Constraints", "B) Nonfunctional requirements", "C) Functional requirements", "D) System architecture"], "answer": "C) Functional requirements" },
+
+{ "type": "mc", "question": "What is a characteristic of nonfunctional requirements?", "options": ["A) They describe specific user interactions", "B) They include performance and reliability issues", "C) They outline system hardware specifications", "D) They detail input and output data"], "answer": "B) They include performance and reliability issues" },
+
+{ "type": "mc", "question": "What should the SRS document include to ensure clarity and avoid contradictions?", "options": ["A) Detailed implementation instructions", "B) Unstructured narrative descriptions", "C) Structured and clear descriptions of requirements", "D) Vague requirements to allow flexibility"], "answer": "C) Structured and clear descriptions of requirements" },
+
+{ "type": "mc", "question": "Which example demonstrates overspecification in an SRS document?", "options": ["A) System should be able to process 1000 transactions per second", "B) System should include user interface for book search", "C) Library member names should be stored in sorted descending order", "D) System should handle input from multiple users"], "answer": "C) Library member names should be stored in sorted descending order" },
+
+{ "type": "mc", "question": "What does a high-level functional requirement involve?", "options": ["A) Description of system architecture", "B) Transformation of input to output data", "C) Specific implementation details", "D) System performance benchmarks"], "answer": "B) Transformation of input to output data" },
+
+{ "type": "mc", "question": "Which part of the SRS document would detail how fast the system should produce results?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) System design"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "Which of the following best describes a constraint in an SRS document?", "options": ["A) System's ability to interact with other systems", "B) Detailed design of system modules", "C) Compliance with standards and performance limits", "D) Usability and maintainability"], "answer": "C) Compliance with standards and performance limits" },
+
+{ "type": "mc", "question": "What does the SRS document's 'Introduction' section typically include?", "options": ["A) Detailed functional requirements", "B) System constraints and design details", "C) Overview of the system and its purpose", "D) Performance metrics and reliability issues"], "answer": "C) Overview of the system and its purpose" },
+
+{ "type": "mc", "question": "How should functional requirements be organized in an SRS document?", "options": ["A) In a detailed narrative form", "B) By user interface design", "C) With proper numbering and clear descriptions", "D) By system hardware specifications"], "answer": "C) With proper numbering and clear descriptions" },
+
+{ "type": "mc", "question": "Which section of the SRS document addresses issues such as security and maintainability?", "options": ["A) Functional requirements", "B) Constraints", "C) Nonfunctional requirements", "D) System architecture"], "answer": "C) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "What is the impact of overspecification in an SRS document?", "options": ["A) Provides flexibility in design", "B) Limits the designer's solution space", "C) Enhances system usability", "D) Describes functional requirements in detail"], "answer": "B) Limits the designer's solution space" },
+
+{ "type": "mc", "question": "Which example best illustrates a constraint related to hardware?", "options": ["A) System must be compatible with Windows and Linux", "B) System should process data within 2 seconds", "C) System should be designed to handle 500 users simultaneously", "D) System should be compatible with existing library software"], "answer": "A) System must be compatible with Windows and Linux" },
+
+{ "type": "mc", "question": "Which requirement type includes 'human-computer interface issues'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Design constraints", "D) Performance requirements"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "What should be avoided in a well-written SRS document?", "options": ["A) Clear and structured descriptions", "B) Contradictions and ambiguities", "C) Detailed functional requirements", "D) Clearly defined constraints"], "answer": "B) Contradictions and ambiguities" },
+
+{ "type": "mc", "question": "What is a typical example of a nonfunctional requirement?", "options": ["A) System's ability to search books by title", "B) System's response time for user requests", "C) System should store data securely", "D) System should allow users to input search keywords"], "answer": "B) System's response time for user requests" },
+
+{ "type": "mc", "question": "Which section of the SRS document includes 'performance requirements'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "What type of specification is considered one of the worst in SRS documents?", "options": ["A) Structured specifications", "B) Narrative essays", "C) Detailed design descriptions", "D) Functional requirements"], "answer": "B) Narrative essays" },
+
+{ "type": "mc", "question": "Which of the following is an example of a good practice for SRS documents?", "options": ["A) Including vague descriptions", "B) Providing detailed design constraints", "C) Ensuring the document is unstructured", "D) Avoiding contradictions"], "answer": "D) Avoiding contradictions" },
+
+{ "type": "mc", "question": "In what part of the SRS document would you expect to find information on how to interact with external systems?", "options": ["A) Functional requirements", "B) Constraints", "C) Nonfunctional requirements", "D) System design"], "answer": "C) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "What does a functional requirement include?", "options": ["A) System performance limits", "B) User interactions and system outputs", "C) Compliance with standards", "D) Design constraints"], "answer": "B) User interactions and system outputs" },
+
+{ "type": "mc", "question": "What type of requirement describes the system's ability to handle different types of data?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Design specifications"], "answer": "A) Functional requirements" },
+
+{ "type": "mc", "question": "Which section of the SRS document should include 'examples of input and output processing'?", "options": ["A) Constraints", "B) Nonfunctional requirements", "C) Functional requirements", "D) Introduction"], "answer": "C) Functional requirements" },
+
+{ "type": "mc", "question": "Which example best illustrates a nonfunctional requirement?", "options": ["A) The system must allow searching by author name", "B) The system must ensure data security", "C) The system must display search results", "D) The system must validate user inputs"], "answer": "B) The system must ensure data security" },
+
+{ "type": "mc", "question": "What should be avoided in the 'Constraints' section of the SRS document?", "options": ["A) Detailed hardware specifications", "B) Clear performance benchmarks", "C) Specific system functionalities", "D) Detailed software requirements"], "answer": "C) Specific system functionalities" },
+
+{ "type": "mc", "question": "What does the SRS document's 'Nonfunctional Requirements' section include?", "options": ["A) System performance and usability", "B) System's functional capabilities", "C) Detailed design specifications", "D) User interaction scenarios"], "answer": "A) System performance and usability" },
+
+{ "type": "mc", "question": "Which type of requirement addresses 'standards compliance'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) System design"], "answer": "C) Constraints" },
+
+{ "type": "mc", "question": "Which section of the SRS document provides an overview and context of the system?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "D) Introduction" },
+
+{ "type": "mc", "question": "What is the impact of detailed design constraints in an SRS document?", "options": ["A) Ensures flexibility in design", "B) Limits the design options", "C) Enhances system usability", "D) Provides clear functional descriptions"], "answer": "B) Limits the design options" },
+
+{ "type": "mc", "question": "Which example illustrates a good practice for specifying requirements?", "options": ["A) Including detailed implementation instructions", "B) Providing unstructured narrative descriptions", "C) Clearly defining functional and nonfunctional requirements", "D) Including design constraints in the functional requirements"], "answer": "C) Clearly defining functional and nonfunctional requirements" },
+
+{ "type": "mc", "question": "Which type of requirements document might include contradictory statements?", "options": ["A) Well-structured specifications", "B) Unstructured narrative documents", "C) Detailed design documents", "D) Functional requirement documents"], "answer": "B) Unstructured narrative documents" },
+
+{ "type": "mc", "question": "What is the role of 'Performance requirements' in the SRS document?", "options": ["A) Describe the system's interaction with users", "B) Define constraints on system performance", "C) Outline functional capabilities of the system", "D) Specify how data should be processed"], "answer": "B) Define constraints on system performance" },
+
+{ "type": "mc", "question": "What does a nonfunctional requirement generally exclude?", "options": ["A) Usability", "B) Performance", "C) System functionality", "D) Reliability"], "answer": "C) System functionality" },
+
+{ "type": "mc", "question": "Which of the following best describes a functional requirement?", "options": ["A) It specifies the system's performance benchmarks", "B) It defines how the system should process data", "C) It details the hardware and software constraints", "D) It describes the system's usability and reliability"], "answer": "B) It defines how the system should process data" },
+
+{ "type": "mc", "question": "What section of the SRS document details 'input data set', 'output data set', and 'processing'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) System design"], "answer": "A) Functional requirements" },
+
+{ "type": "mc", "question": "Which type of requirements include 'human-computer interface issues'?", "options": ["A) Constraints", "B) Nonfunctional requirements", "C) Functional requirements", "D) Design specifications"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "What does a 'high-level requirement' refer to in the context of functional requirements?", "options": ["A) Specific implementation details", "B) System's ability to handle data", "C) General functionality and user interaction", "D) Detailed system design"], "answer": "C) General functionality and user interaction" },
+
+{ "type": "mc", "question": "Which section of the SRS document is responsible for describing 'standards compliance' and 'performance limits'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) System design"], "answer": "C) Constraints" },
+
+{ "type": "mc", "question": "What does the SRS document's 'Introduction' typically include?", "options": ["A) Details of functional and nonfunctional requirements", "B) Overview of the system and its purpose", "C) Detailed design constraints", "D) System performance metrics"], "answer": "B) Overview of the system and its purpose" },
+
+{ "type": "mc", "question": "What type of requirement might include 'usability' and 'maintainability' aspects?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) System architecture"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "Which part of the SRS document outlines how to handle specific types of input and output data?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "A) Functional requirements" },
+
+{ "type": "mc", "question": "Which example is a nonfunctional requirement?", "options": ["A) The system must be able to search by book title", "B) The system must have a response time of under 2 seconds", "C) The system should handle multiple user inputs", "D) The system must store data securely"], "answer": "D) The system must store data securely" },
+
+{ "type": "mc", "question": "What is the role of 'Constraints' in the SRS document?", "options": ["A) To specify detailed system functionalities", "B) To describe performance benchmarks and standards compliance", "C) To provide detailed design constraints", "D) To outline user interactions and data processing"], "answer": "B) To describe performance benchmarks and standards compliance" },
+
+{ "type": "mc", "question": "Which section of the SRS document might include 'user interaction scenarios'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) System design"], "answer": "A) Functional requirements" },
+
+{ "type": "mc", "question": "Which of the following is a characteristic of an 'overspecified' SRS document?", "options": ["A) Provides flexibility in design", "B) Restricts the designer's solution space", "C) Enhances system usability", "D) Includes clear functional descriptions"], "answer": "B) Restricts the designer's solution space" },
+
+{ "type": "mc", "question": "Which section of the SRS document details 'performance requirements'?", "options": ["A) Constraints", "B) Nonfunctional requirements", "C) Functional requirements", "D) Introduction"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "What is an example of a bad practice in an SRS document?", "options": ["A) Clear and structured descriptions", "B) Providing unstructured narrative descriptions", "C) Including well-defined constraints", "D) Avoiding contradictions"], "answer": "B) Providing unstructured narrative descriptions" },
+
+{ "type": "mc", "question": "Which example illustrates a good practice for specifying constraints?", "options": ["A) The system must be compatible with existing library software", "B) The system should handle multiple user inputs", "C) The system should ensure data security", "D) The system must process data within 2 seconds"], "answer": "A) The system must be compatible with existing library software" },
+
+{ "type": "mc", "question": "Which type of requirement is concerned with 'system performance'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) System design"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "Which section of the SRS document includes 'examples of input and output processing'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "A) Functional requirements" },
+
+{ "type": "mc", "question": "Which of the following is a characteristic of a good SRS document?", "options": ["A) Vague and unstructured descriptions", "B) Detailed implementation instructions", "C) Clear and structured requirements", "D) Unspecified constraints"], "answer": "C) Clear and structured requirements" },
+
+{ "type": "mc", "question": "What is the impact of providing 'unstructured narrative descriptions' in an SRS document?", "options": ["A) Enhances clarity and precision", "B) Ensures flexibility in design", "C) Makes the document difficult to change and ambiguous", "D) Provides clear and detailed specifications"], "answer": "C) Makes the document difficult to change and ambiguous" },
+
+{ "type": "mc", "question": "Which section of the SRS document typically includes 'examples of system functionality'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "A) Functional requirements" },
+
+{ "type": "mc", "question": "Which example best describes a good practice for writing functional requirements?", "options": ["A) The system must handle data securely", "B) The system should display results within 2 seconds", "C) The system should include a search functionality", "D) The system must comply with industry standards"], "answer": "C) The system should include a search functionality" },
+
+{ "type": "mc", "question": "What is an example of a nonfunctional requirement related to user interaction?", "options": ["A) The system must allow users to search by author name", "B) The system must have a response time of under 2 seconds", "C) The system should include a user-friendly interface", "D) The system must validate user inputs"], "answer": "C) The system should include a user-friendly interface" },
+
+{ "type": "mc", "question": "Which section of the SRS document includes 'system constraints and limitations'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "C) Constraints" },
+
+{ "type": "mc", "question": "Which type of requirement focuses on 'system reliability and performance'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Design specifications"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "Which section of the SRS document would describe the 'system's ability to interact with external systems'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) System design"], "answer": "B) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "What does the 'Introduction' section of the SRS document provide?", "options": ["A) Detailed descriptions of functional requirements", "B) Overview and context of the system", "C) Performance benchmarks", "D) System design constraints"], "answer": "B) Overview and context of the system" },
+
+{ "type": "mc", "question": "Which example illustrates a 'good practice' for writing nonfunctional requirements?", "options": ["A) The system must validate user inputs", "B) The system should include detailed design constraints", "C) The system should ensure usability and maintainability", "D) The system must process data within 2 seconds"], "answer": "C) The system should ensure usability and maintainability" },
+
+{ "type": "mc", "question": "Which of the following best illustrates a constraint in the SRS document?", "options": ["A) The system must be compatible with existing hardware", "B) The system should process data quickly", "C) The system must handle multiple user inputs", "D) The system should include a search function"], "answer": "A) The system must be compatible with existing hardware" },
+
+{ "type": "mc", "question": "What does the 'Constraints' section of the SRS document address?", "options": ["A) User interactions and data processing", "B) Standards compliance and system performance limits", "C) Detailed design constraints", "D) System's functional capabilities"], "answer": "B) Standards compliance and system performance limits" },
+
+{ "type": "mc", "question": "What type of requirements might include 'input data sets' and 'output data sets'?", "options": ["A) Nonfunctional requirements", "B) Functional requirements", "C) Constraints", "D) System design"], "answer": "B) Functional requirements" },
+
+{ "type": "mc", "question": "Which example best demonstrates a 'bad practice' in functional requirements?", "options": ["A) The system should allow users to search for books", "B) The system must include detailed design constraints", "C) The system should provide search results quickly", "D) The system should ensure data security"], "answer": "B) The system must include detailed design constraints" },
+
+{ "type": "mc", "question": "Which section of the SRS document addresses 'performance metrics'?", "options": ["A) Constraints", "B) Functional requirements", "C) Nonfunctional requirements", "D) Introduction"], "answer": "C) Nonfunctional requirements" },
+
+{ "type": "mc", "question": "What is the role of 'Functional requirements' in the SRS document?", "options": ["A) To define system constraints and limitations", "B) To describe system performance and usability", "C) To specify what the system should do", "D) To provide an overview of the system"], "answer": "C) To specify what the system should do" },
+
+{ "type": "mc", "question": "What should be avoided to ensure clarity in an SRS document?", "options": ["A) Detailed functional descriptions", "B) Clear and structured requirements", "C) Contradictions and ambiguities", "D) Defined constraints"], "answer": "C) Contradictions and ambiguities" },
+
+{ "type": "mc", "question": "Which of the following describes a characteristic of a nonfunctional requirement?", "options": ["A) It specifies system interactions", "B) It addresses system performance and usability", "C) It outlines detailed system functionalities", "D) It describes how the system should process data"], "answer": "B) It addresses system performance and usability" },
+
+{ "type": "mc", "question": "What type of requirement includes 'input data' and 'output data' descriptions?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) System design"], "answer": "A) Functional requirements" },
+
+{ "type": "mc", "question": "Which section of the SRS document would detail 'how the system should produce results'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "C) Constraints" },
+
+{ "type": "mc", "question": "What is the primary focus of functional requirements in the SRS document?", "options": ["A) System performance", "B) System functionality", "C) User interface design", "D) System constraints"], "answer": "B) System functionality" },
+
+  { "type": "mc", "question": "Which section of the SRS document typically includes 'hardware and software requirements'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "C) Constraints" },
+
+  { "type": "mc", "question": "What does the 'Constraints' section of the SRS document describe?", "options": ["A) System functionalities", "B) Performance and usability", "C) Standards and limitations", "D) User interaction scenarios"], "answer": "C) Standards and limitations" },
+
+  { "type": "mc", "question": "Which section would include 'detailed descriptions of system interactions'?", "options": ["A) Constraints", "B) Nonfunctional requirements", "C) Functional requirements", "D) Introduction"], "answer": "C) Functional requirements" },
+
+  { "type": "mc", "question": "What type of requirement includes 'reliability issues' and 'interface with external systems'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Design specifications"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What should be avoided when writing 'Functional Requirements'?", "options": ["A) Detailed process descriptions", "B) Clear input and output specifications", "C) Detailed system constraints", "D) Specific functional capabilities"], "answer": "C) Detailed system constraints" },
+
+  { "type": "mc", "question": "Which example best represents a 'Functional Requirement'?", "options": ["A) The system must be able to handle 1000 users", "B) The system must allow users to search by author", "C) The system should include a user-friendly interface", "D) The system must adhere to security standards"], "answer": "B) The system must allow users to search by author" },
+
+  { "type": "mc", "question": "What does the 'Introduction' section of the SRS document typically include?", "options": ["A) Performance benchmarks", "B) Detailed system constraints", "C) Overview and context of the system", "D) Input and output data"], "answer": "C) Overview and context of the system" },
+
+  { "type": "mc", "question": "Which type of requirement focuses on 'system security and data protection'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Design specifications"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "Which section of the SRS document should include 'system design constraints'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "C) Constraints" },
+
+  { "type": "mc", "question": "Which part of the SRS document describes 'how the system processes data'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "A) Functional requirements" },
+
+  { "type": "mc", "question": "What is the role of 'Nonfunctional Requirements' in the SRS document?", "options": ["A) To specify detailed system functionalities", "B) To describe system's performance and usability", "C) To outline user interaction scenarios", "D) To define system constraints"], "answer": "B) To describe system's performance and usability" },
+
+  { "type": "mc", "question": "Which of the following describes a 'good practice' for writing constraints in an SRS document?", "options": ["A) Including detailed functional descriptions", "B) Specifying compliance with standards", "C) Detailing system usability", "D) Providing examples of system interactions"], "answer": "B) Specifying compliance with standards" },
+
+  { "type": "mc", "question": "What should be included in the 'Functional Requirements' section?", "options": ["A) User interaction scenarios", "B) System performance metrics", "C) Detailed hardware specifications", "D) System capabilities and functionalities"], "answer": "D) System capabilities and functionalities" },
+
+  { "type": "mc", "question": "Which example represents a 'Nonfunctional Requirement'?", "options": ["A) The system must allow book searches", "B) The system must be compatible with existing software", "C) The system must process searches within 2 seconds", "D) The system must provide a secure login"], "answer": "B) The system must be compatible with existing software" },
+
+  { "type": "mc", "question": "What should be avoided to ensure effective 'Functional Requirements'?", "options": ["A) Clear process descriptions", "B) Detailed data handling procedures", "C) Unspecified system capabilities", "D) Examples of system functionality"], "answer": "C) Unspecified system capabilities" },
+
+  { "type": "mc", "question": "Which part of the SRS document typically includes 'user interface design considerations'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What is an example of a 'Constraint' in the SRS document?", "options": ["A) The system must validate user inputs", "B) The system must be compatible with the latest operating systems", "C) The system should handle data securely", "D) The system must include a search functionality"], "answer": "B) The system must be compatible with the latest operating systems" },
+
+  { "type": "mc", "question": "Which section of the SRS document describes 'reliability and performance issues'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What is an example of 'Overspecification' in an SRS document?", "options": ["A) The system should be able to handle multiple users", "B) The system should sort member names in descending order", "C) The system must process data efficiently", "D) The system must include a login feature"], "answer": "B) The system should sort member names in descending order" },
+
+  { "type": "mc", "question": "Which section of the SRS document includes 'input and output processing examples'?", "options": ["A) Constraints", "B) Nonfunctional requirements", "C) Functional requirements", "D) Introduction"], "answer": "C) Functional requirements" },
+
+  { "type": "mc", "question": "What is the role of 'Constraints' in the SRS document?", "options": ["A) To describe the system’s functional capabilities", "B) To outline standards and performance limitations", "C) To specify how data should be processed", "D) To define user interaction scenarios"], "answer": "B) To outline standards and performance limitations" },
+
+  { "type": "mc", "question": "Which section of the SRS document would include 'system’s interaction with external systems'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What should be avoided when writing 'Nonfunctional Requirements'?", "options": ["A) Detailed performance metrics", "B) Clear usability descriptions", "C) Unspecified system constraints", "D) Examples of user interaction"], "answer": "C) Unspecified system constraints" },
+
+  { "type": "mc", "question": "Which section of the SRS document describes 'how fast the system can produce results'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "C) Constraints" },
+
+  { "type": "mc", "question": "Which of the following best illustrates a 'good practice' for writing functional requirements?", "options": ["A) The system must be compatible with legacy systems", "B) The system should allow users to search by multiple criteria", "C) The system must include data security measures", "D) The system must process data efficiently"], "answer": "B) The system should allow users to search by multiple criteria" },
+
+  { "type": "mc", "question": "What is a characteristic of a 'well-structured' SRS document?", "options": ["A) Clear and detailed functional descriptions", "B) Unstructured narrative descriptions", "C) Ambiguous performance metrics", "D) Unspecified design constraints"], "answer": "A) Clear and detailed functional descriptions" },
+
+  { "type": "mc", "question": "Which section includes 'hardware and operating system requirements'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "C) Constraints" },
+
+  { "type": "mc", "question": "What should be included in the 'Nonfunctional Requirements' section?", "options": ["A) Data input and output specifications", "B) System capabilities and functionalities", "C) Performance benchmarks and usability", "D) User interaction scenarios"], "answer": "C) Performance benchmarks and usability" },
+
+  { "type": "mc", "question": "Which section of the SRS document addresses 'interface with other external systems'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "Which example best represents a 'good practice' in writing constraints?", "options": ["A) The system should include a search feature", "B) The system must be compatible with various hardware configurations", "C) The system should provide a user-friendly interface", "D) The system must handle multiple data types"], "answer": "B) The system must be compatible with various hardware configurations" },
+
+  { "type": "mc", "question": "What is an example of a 'bad practice' in writing functional requirements?", "options": ["A) Detailed descriptions of user interactions", "B) Vague and unstructured descriptions", "C) Specific data input and output requirements", "D) Clear examples of system functionality"], "answer": "B) Vague and unstructured descriptions" },
+
+  { "type": "mc", "question": "Which section of the SRS document would include 'security requirements'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What is the purpose of including 'system design constraints' in the SRS document?", "options": ["A) To specify the system’s functionalities", "B) To describe performance and usability", "C) To outline limitations and compliance requirements", "D) To provide examples of system interactions"], "answer": "C) To outline limitations and compliance requirements" },
+
+  { "type": "mc", "question": "Which section of the SRS document provides 'examples of system functionality'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "A) Functional requirements" },
+
+  { "type": "mc", "question": "What should be avoided in the 'Functional Requirements' section to ensure clarity?", "options": ["A) Detailed descriptions of system functionality", "B) Ambiguous or vague descriptions", "C) Examples of input and output data", "D) Clear process descriptions"], "answer": "B) Ambiguous or vague descriptions" },
+
+  { "type": "mc", "question": "Which type of requirement would include 'reliability and maintainability'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Design specifications"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What should be included in the 'Functional Requirements' section?", "options": ["A) Performance benchmarks", "B) System capabilities and functionalities", "C) Hardware requirements", "D) User interaction scenarios"], "answer": "B) System capabilities and functionalities" },
+
+  { "type": "mc", "question": "Which section of the SRS document describes 'input data sets and output data sets'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "A) Functional requirements" },
+
+  { "type": "mc", "question": "Which of the following best describes 'Overspecification' in an SRS document?", "options": ["A) Including specific functional capabilities", "B) Providing detailed system design constraints", "C) Specifying 'how to' aspects of implementation", "D) Describing general system requirements"], "answer": "C) Specifying 'how to' aspects of implementation" },
+
+  { "type": "mc", "question": "What is the primary purpose of 'Nonfunctional Requirements'?", "options": ["A) To specify system capabilities", "B) To define user interaction scenarios", "C) To describe performance and usability aspects", "D) To outline system constraints"], "answer": "C) To describe performance and usability aspects" },
+
+  { "type": "mc", "question": "What is an example of a 'Functional Requirement'?", "options": ["A) The system must process user inputs securely", "B) The system should display search results within 2 seconds", "C) The system must support multiple operating systems", "D) The system should have a user-friendly interface"], "answer": "B) The system should display search results within 2 seconds" },
+
+  { "type": "mc", "question": "Which section of the SRS document would include 'detailed user interaction scenarios'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "A) Functional requirements" },
+
+  { "type": "mc", "question": "What does the 'Introduction' section typically provide in the SRS document?", "options": ["A) System design constraints", "B) Overview and context of the system", "C) Performance metrics", "D) Functional requirements"], "answer": "B) Overview and context of the system" },
+
+  { "type": "mc", "question": "What is an example of a 'Nonfunctional Requirement'?", "options": ["A) The system should include a search feature", "B) The system must support a maximum of 1000 users", "C) The system must process transactions in less than 2 seconds", "D) The system must be easy to use"], "answer": "D) The system must be easy to use" },
+
+  { "type": "mc", "question": "Which of the following describes a 'bad practice' for writing constraints?", "options": ["A) Defining specific performance limits", "B) Outlining hardware requirements", "C) Providing detailed functional descriptions", "D) Including ambiguous or vague descriptions"], "answer": "D) Including ambiguous or vague descriptions" },
+
+  { "type": "mc", "question": "What is the role of the 'Constraints' section in the SRS document?", "options": ["A) To describe system functionalities", "B) To outline system performance requirements", "C) To specify design and implementation constraints", "D) To provide examples of system interactions"], "answer": "C) To specify design and implementation constraints" },
+
+  { "type": "mc", "question": "What type of requirements focus on 'system usability and maintainability'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Design specifications"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "Which example illustrates a 'good practice' for writing functional requirements?", "options": ["A) The system should handle data securely", "B) The system must process data within 2 seconds", "C) The system should allow users to search by various criteria", "D) The system must include a secure login"], "answer": "C) The system should allow users to search by various criteria" },
+
+  { "type": "mc", "question": "What should be included in the 'Constraints' section of the SRS document?", "options": ["A) Detailed functional descriptions", "B) Examples of system functionality", "C) Compliance with standards and limitations", "D) Usability and performance metrics"], "answer": "C) Compliance with standards and limitations" },
+
+  { "type": "mc", "question": "Which section of the SRS document would include 'reliability and performance issues'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What is the role of 'Functional Requirements' in the SRS document?", "options": ["A) To describe system performance and usability", "B) To specify what the system should do", "C) To outline design constraints", "D) To provide an overview of the system"], "answer": "B) To specify what the system should do" },
+
+  { "type": "mc", "question": "Which example best represents a 'good practice' in writing constraints?", "options": ["A) The system must process data within 2 seconds", "B) The system should include a search feature", "C) The system must be compatible with existing hardware", "D) The system must include a user-friendly interface"], "answer": "C) The system must be compatible with existing hardware" },
+
+  { "type": "mc", "question": "Which of the following describes a 'bad practice' in writing nonfunctional requirements?", "options": ["A) Detailed performance metrics", "B) Clear usability descriptions", "C) Vague descriptions of system constraints", "D) Specific security requirements"], "answer": "C) Vague descriptions of system constraints" },
+
+  { "type": "mc", "question": "What should be avoided in the 'Introduction' section of the SRS document?", "options": ["A) Overview of the system", "B) Context and scope", "C) Detailed functional specifications", "D) System goals"], "answer": "C) Detailed functional specifications" },
+
+  { "type": "mc", "question": "What type of requirement includes 'usability and portability'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Design specifications"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What is an example of a 'good practice' for writing functional requirements?", "options": ["A) The system should include a secure login", "B) The system must support various operating systems", "C) The system must handle a large number of users", "D) The system should allow users to perform searches"], "answer": "D) The system should allow users to perform searches" },
+
+  { "type": "mc", "question": "Which section of the SRS document provides 'examples of system functionality and interactions'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "A) Functional requirements" },
+
+  { "type": "mc", "question": "Which type of requirement includes 'interface with other external systems'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Design specifications"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What should be included in the 'Functional Requirements' section to ensure clarity?", "options": ["A) Detailed descriptions of input and output", "B) Ambiguous system constraints", "C) Unspecified performance metrics", "D) General system goals"], "answer": "A) Detailed descriptions of input and output" },
+
+  { "type": "mc", "question": "Which of the following is an example of a 'bad practice' in writing functional requirements?", "options": ["A) Clear process descriptions", "B) Specific data handling procedures", "C) Unspecified system capabilities", "D) Examples of user interactions"], "answer": "C) Unspecified system capabilities" },
+
+  { "type": "mc", "question": "What is the purpose of including 'standards compliance' in the 'Constraints' section?", "options": ["A) To define system functionalities", "B) To specify performance metrics", "C) To outline system limitations and adherence to standards", "D) To describe user interaction scenarios"], "answer": "C) To outline system limitations and adherence to standards" },
+
+  { "type": "mc", "question": "Which section of the SRS document describes 'performance benchmarks'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "B) Nonfunctional requirements" },
+
+  { "type": "mc", "question": "What should be avoided to ensure effective 'Functional Requirements'?", "options": ["A) Clear input and output specifications", "B) Detailed system interactions", "C) Unspecified design constraints", "D) Specific functional capabilities"], "answer": "C) Unspecified design constraints" },
+
+  { "type": "mc", "question": "What does the 'Nonfunctional Requirements' section typically include?", "options": ["A) System functionalities", "B) User interaction scenarios", "C) Performance and usability aspects", "D) Hardware specifications"], "answer": "C) Performance and usability aspects" },
+
+  { "type": "mc", "question": "Which section of the SRS document outlines 'data processing requirements'?", "options": ["A) Functional requirements", "B) Nonfunctional requirements", "C) Constraints", "D) Introduction"], "answer": "A) Functional requirements" },
+
+  { "type": "mc", "question": "What is an example of a 'good practice' for writing constraints?", "options": ["A) The system should allow users to perform searches", "B) The system must be compatible with existing hardware", "C) The system must include a secure login", "D) The system should process data efficiently"], "answer": "B) The system must be compatible with existing hardware" },
+
+
+
+];
+
+
+
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedTFCount = 0;
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+            shuffleQuestions();
+        });
+
+        function updateRangeValues() {
+            const tfRange = document.getElementById('tfCount');
+            const mcRange = document.getElementById('mcCount');
+            tfRange.max = questions.filter(q => q.type === 'tf').length;
+            mcRange.max = questions.filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function startExam() {
+            selectedTFCount = parseInt(document.getElementById('tfCount').value);
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const tfQuestions = questions.filter(q => q.type === 'tf').slice(0, selectedTFCount);
+            const mcQuestions = questions.filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return [...tfQuestions, ...mcQuestions];
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'tf') {
+                questionElement.innerHTML += `
+                    <label style="display:block;"><input type="radio" name="answer" value="T"> F</label>
+                    <label style="display:block;"><input type="radio" name="answer" value="F"> F</label>
+                `;
+            } else if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = F;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                } else {
+                    correctAnswers.push({ question: question.question, correctAnswer: question.answer, userAnswer: userAnswers[index] });
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = `<div class="result">You scored ${score} out of ${selectedQuestions.length}</div>`;
+
+            if (score === selectedQuestions.length) {
+                resultContainer.innerHTML += '<div class="result">Congratulations! You got a perfect score!</div>';
+            } else {
+                correctAnswers.forEach(({ question, correctAnswer, userAnswer }) => {
+                    resultContainer.innerHTML += `
+                        <div class="result">
+                            <p>Question: ${question}</p>
+                            <p>Correct Answer: ${correctAnswer}</p>
+                            <p>Your Answer: ${userAnswer}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('homeContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+
